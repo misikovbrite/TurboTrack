@@ -1,0 +1,469 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0CB22EBBF0389AC26E28998E /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C03973F87619A762AC8471D /* LocationService.swift */; };
+		1C9B4162ECA9478DFEA31C91 /* TurbulenceAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FCEAF7D6146EFB7F873758 /* TurbulenceAnnotation.swift */; };
+		2B87C3F6613676CABAD6D4FD /* Airport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0F924FEDFA69E88BDD8CF6 /* Airport.swift */; };
+		2FE4DECBA9E45EBF255BDC79 /* ReportsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB951EF1CE817567DAAB06F /* ReportsListView.swift */; };
+		3427435FC5D2CF3961CB02C2 /* RouteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183705284B199B3333CCCA5 /* RouteViewModel.swift */; };
+		35667FBF2A1F825052052993 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B30AA180F2B9AADC111FF3 /* SettingsView.swift */; };
+		4FE8BA19EBBB6704DE4AB253 /* AviationWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8938E198455778F352AEB870 /* AviationWeatherService.swift */; };
+		580A521EC959D58AFF603A50 /* ReportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F485C92FF2C1E00FAF4625 /* ReportRow.swift */; };
+		5DE46009EDAD2A4A2E7B6234 /* RouteMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE721B19AFB03674B844D6B /* RouteMapView.swift */; };
+		687E008666F45988ACE7346D /* ReportDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FEFF479AA4B48A46DA2689E /* ReportDetailSheet.swift */; };
+		6A6522AF99ECE7EE8DFBD764 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96173FB47B38F365494CADE8 /* Extensions.swift */; };
+		79EDB0C7559C062CBBCFC69D /* PIREPReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FA00FE4BCAFDEBE0C74E79 /* PIREPReport.swift */; };
+		82F5CCD6341473D87411A1DF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2020F40F0821736B02E8C82 /* ContentView.swift */; };
+		8E4AB2CC7EECFC9402B1CCA0 /* TurbulenceMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8738781F71A4C7CF891ABA39 /* TurbulenceMapView.swift */; };
+		C01CD095A42F05FC24B4EA1F /* TurboTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD2B32B06534B2E43C16002 /* TurboTrackApp.swift */; };
+		D30FF6535A223767542E6347 /* SIGMET.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C297DA0115E80AC915056C3 /* SIGMET.swift */; };
+		D6826B0F0C70A512B50D94DD /* ReportsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4131B99E42E3FC815AEFFB61 /* ReportsViewModel.swift */; };
+		D75104FA8FE0CCD5A2051249 /* TurbulenceSeverity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE333455BE4B6308EE3EB6C /* TurbulenceSeverity.swift */; };
+		E0873CB7D396F584711A304D /* RouteInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CDBDB70BECA0BA7DBD09A /* RouteInputView.swift */; };
+		EF948A0E7FA3C191B12A9E0B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 78A01F92572C9AE0FBABC6EE /* Assets.xcassets */; };
+		FDAE3EA0A104A9207053578C /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 576EF129971C2F95AA1D2EC0 /* MapViewModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0DE721B19AFB03674B844D6B /* RouteMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteMapView.swift; sourceTree = "<group>"; };
+		2C297DA0115E80AC915056C3 /* SIGMET.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIGMET.swift; sourceTree = "<group>"; };
+		2FB951EF1CE817567DAAB06F /* ReportsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsListView.swift; sourceTree = "<group>"; };
+		3FEFF479AA4B48A46DA2689E /* ReportDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportDetailSheet.swift; sourceTree = "<group>"; };
+		4131B99E42E3FC815AEFFB61 /* ReportsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsViewModel.swift; sourceTree = "<group>"; };
+		576EF129971C2F95AA1D2EC0 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
+		6183705284B199B3333CCCA5 /* RouteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteViewModel.swift; sourceTree = "<group>"; };
+		63F485C92FF2C1E00FAF4625 /* ReportRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportRow.swift; sourceTree = "<group>"; };
+		69B30AA180F2B9AADC111FF3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		6BD2B32B06534B2E43C16002 /* TurboTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurboTrackApp.swift; sourceTree = "<group>"; };
+		6F0F924FEDFA69E88BDD8CF6 /* Airport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Airport.swift; sourceTree = "<group>"; };
+		6FE333455BE4B6308EE3EB6C /* TurbulenceSeverity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurbulenceSeverity.swift; sourceTree = "<group>"; };
+		78A01F92572C9AE0FBABC6EE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7C03973F87619A762AC8471D /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		8738781F71A4C7CF891ABA39 /* TurbulenceMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurbulenceMapView.swift; sourceTree = "<group>"; };
+		8938E198455778F352AEB870 /* AviationWeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AviationWeatherService.swift; sourceTree = "<group>"; };
+		96173FB47B38F365494CADE8 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		BF9410CAC0528E469B9031EE /* TurboTrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TurboTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2FA00FE4BCAFDEBE0C74E79 /* PIREPReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PIREPReport.swift; sourceTree = "<group>"; };
+		DA2CDBDB70BECA0BA7DBD09A /* RouteInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteInputView.swift; sourceTree = "<group>"; };
+		E4FCEAF7D6146EFB7F873758 /* TurbulenceAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurbulenceAnnotation.swift; sourceTree = "<group>"; };
+		F2020F40F0821736B02E8C82 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0148F420EFAB5135ECB080F0 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				576EF129971C2F95AA1D2EC0 /* MapViewModel.swift */,
+				4131B99E42E3FC815AEFFB61 /* ReportsViewModel.swift */,
+				6183705284B199B3333CCCA5 /* RouteViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		039A567D291673AD99606CC1 /* Reports */ = {
+			isa = PBXGroup;
+			children = (
+				63F485C92FF2C1E00FAF4625 /* ReportRow.swift */,
+				2FB951EF1CE817567DAAB06F /* ReportsListView.swift */,
+			);
+			path = Reports;
+			sourceTree = "<group>";
+		};
+		1547387005725FC33C961FBA = {
+			isa = PBXGroup;
+			children = (
+				E2FEE98F41A2B5B91804896B /* TurboTrack */,
+				668DE9746218CB8F870B2484 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		21EDED524C82FA22B04AA0EC /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				6F0F924FEDFA69E88BDD8CF6 /* Airport.swift */,
+				C2FA00FE4BCAFDEBE0C74E79 /* PIREPReport.swift */,
+				2C297DA0115E80AC915056C3 /* SIGMET.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2A0554F08B95F8F7DCEFB7DF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F2020F40F0821736B02E8C82 /* ContentView.swift */,
+				427B433527EC7B6F265B3D90 /* Map */,
+				039A567D291673AD99606CC1 /* Reports */,
+				5206D0C458E67CC326013F31 /* Route */,
+				F71FCE5C0040C17F97E8A27C /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		427B433527EC7B6F265B3D90 /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				3FEFF479AA4B48A46DA2689E /* ReportDetailSheet.swift */,
+				E4FCEAF7D6146EFB7F873758 /* TurbulenceAnnotation.swift */,
+				8738781F71A4C7CF891ABA39 /* TurbulenceMapView.swift */,
+			);
+			path = Map;
+			sourceTree = "<group>";
+		};
+		5206D0C458E67CC326013F31 /* Route */ = {
+			isa = PBXGroup;
+			children = (
+				DA2CDBDB70BECA0BA7DBD09A /* RouteInputView.swift */,
+				0DE721B19AFB03674B844D6B /* RouteMapView.swift */,
+			);
+			path = Route;
+			sourceTree = "<group>";
+		};
+		668DE9746218CB8F870B2484 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BF9410CAC0528E469B9031EE /* TurboTrack.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7BCB8F971D3F79FA9638F243 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				96173FB47B38F365494CADE8 /* Extensions.swift */,
+				6FE333455BE4B6308EE3EB6C /* TurbulenceSeverity.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		D83A427C39A09C52128026BE /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				8938E198455778F352AEB870 /* AviationWeatherService.swift */,
+				7C03973F87619A762AC8471D /* LocationService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		E2FEE98F41A2B5B91804896B /* TurboTrack */ = {
+			isa = PBXGroup;
+			children = (
+				78A01F92572C9AE0FBABC6EE /* Assets.xcassets */,
+				6BD2B32B06534B2E43C16002 /* TurboTrackApp.swift */,
+				21EDED524C82FA22B04AA0EC /* Models */,
+				D83A427C39A09C52128026BE /* Services */,
+				7BCB8F971D3F79FA9638F243 /* Utils */,
+				0148F420EFAB5135ECB080F0 /* ViewModels */,
+				2A0554F08B95F8F7DCEFB7DF /* Views */,
+			);
+			path = TurboTrack;
+			sourceTree = "<group>";
+		};
+		F71FCE5C0040C17F97E8A27C /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				69B30AA180F2B9AADC111FF3 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		90878DAC27F0BCA325F7AFC5 /* TurboTrack */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51FCF3E64158F4DD024B73AD /* Build configuration list for PBXNativeTarget "TurboTrack" */;
+			buildPhases = (
+				38EBA15F2B78526DEA5D5183 /* Sources */,
+				333E8A3276D27DC9EEF23056 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TurboTrack;
+			packageProductDependencies = (
+			);
+			productName = TurboTrack;
+			productReference = BF9410CAC0528E469B9031EE /* TurboTrack.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1FD564DA24DA2A37D3D8B1BF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					90878DAC27F0BCA325F7AFC5 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 4D2DB1912EFFD1EF86380495 /* Build configuration list for PBXProject "TurboTrack" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1547387005725FC33C961FBA;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				90878DAC27F0BCA325F7AFC5 /* TurboTrack */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		333E8A3276D27DC9EEF23056 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EF948A0E7FA3C191B12A9E0B /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		38EBA15F2B78526DEA5D5183 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B87C3F6613676CABAD6D4FD /* Airport.swift in Sources */,
+				4FE8BA19EBBB6704DE4AB253 /* AviationWeatherService.swift in Sources */,
+				82F5CCD6341473D87411A1DF /* ContentView.swift in Sources */,
+				6A6522AF99ECE7EE8DFBD764 /* Extensions.swift in Sources */,
+				0CB22EBBF0389AC26E28998E /* LocationService.swift in Sources */,
+				FDAE3EA0A104A9207053578C /* MapViewModel.swift in Sources */,
+				79EDB0C7559C062CBBCFC69D /* PIREPReport.swift in Sources */,
+				687E008666F45988ACE7346D /* ReportDetailSheet.swift in Sources */,
+				580A521EC959D58AFF603A50 /* ReportRow.swift in Sources */,
+				2FE4DECBA9E45EBF255BDC79 /* ReportsListView.swift in Sources */,
+				D6826B0F0C70A512B50D94DD /* ReportsViewModel.swift in Sources */,
+				E0873CB7D396F584711A304D /* RouteInputView.swift in Sources */,
+				5DE46009EDAD2A4A2E7B6234 /* RouteMapView.swift in Sources */,
+				3427435FC5D2CF3961CB02C2 /* RouteViewModel.swift in Sources */,
+				D30FF6535A223767542E6347 /* SIGMET.swift in Sources */,
+				35667FBF2A1F825052052993 /* SettingsView.swift in Sources */,
+				C01CD095A42F05FC24B4EA1F /* TurboTrackApp.swift in Sources */,
+				1C9B4162ECA9478DFEA31C91 /* TurbulenceAnnotation.swift in Sources */,
+				8E4AB2CC7EECFC9402B1CCA0 /* TurbulenceMapView.swift in Sources */,
+				D75104FA8FE0CCD5A2051249 /* TurbulenceSeverity.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		759068403E8362863B3272AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		82CD03448427E2379374ADA0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5487HDH2B9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "TurboTrack uses your location to show nearby turbulence reports.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.turbotrack.TurboTrack;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		95E9F4E312F94C5344757ED7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A2FBC580F8E7A58CDA05E43A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5487HDH2B9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "TurboTrack uses your location to show nearby turbulence reports.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.turbotrack.TurboTrack;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4D2DB1912EFFD1EF86380495 /* Build configuration list for PBXProject "TurboTrack" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				759068403E8362863B3272AF /* Debug */,
+				95E9F4E312F94C5344757ED7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		51FCF3E64158F4DD024B73AD /* Build configuration list for PBXNativeTarget "TurboTrack" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				82CD03448427E2379374ADA0 /* Debug */,
+				A2FBC580F8E7A58CDA05E43A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1FD564DA24DA2A37D3D8B1BF /* Project object */;
+}
