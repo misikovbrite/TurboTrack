@@ -14,102 +14,100 @@ actor AviationWeatherService {
     }
 
     // MARK: - PIREPs
+    // Requires either bbox or id+dist parameter
+    // Uses multiple station queries to cover continental US
 
     func fetchPIREPs(hoursBack: Int = 6) async throws -> [PIREPReport] {
-        let urlString = "\(baseURL)/pirep?format=json&age=\(hoursBack)&type=turb"
+        // Query multiple major stations to cover the US
+        let stations = ["KJFK", "KLAX", "KORD", "KATL", "KDEN", "KDFW", "KSFO", "KSEA", "KMIA", "KBOS"]
+        var allReports: [PIREPReport] = []
+
+        await withTaskGroup(of: [PIREPReport].self) { group in
+            for station in stations {
+                group.addTask {
+                    do {
+                        return try await self.fetchPIREPsForStation(station: station, hoursBack: hoursBack, distance: 500)
+                    } catch {
+                        print("Failed to fetch PIREPs for \(station): \(error)")
+                        return []
+                    }
+                }
+            }
+
+            for await reports in group {
+                allReports.append(contentsOf: reports)
+            }
+        }
+
+        // Deduplicate by rawText
+        var seen = Set<String>()
+        return allReports.filter { report in
+            guard let raw = report.rawText else { return true }
+            if seen.contains(raw) { return false }
+            seen.insert(raw)
+            return report.coordinate != nil
+        }
+    }
+
+    private func fetchPIREPsForStation(station: String, hoursBack: Int, distance: Int) async throws -> [PIREPReport] {
+        let urlString = "\(baseURL)/pirep?format=json&age=\(hoursBack)&id=\(station)&dist=\(distance)"
         guard let url = URL(string: urlString) else {
             throw WeatherServiceError.invalidURL
         }
 
         let (data, response) = try await session.data(from: url)
 
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw WeatherServiceError.serverError
         }
 
-        if data.isEmpty { return [] }
+        // 204 = no data available
+        if httpResponse.statusCode == 204 || data.isEmpty {
+            return []
+        }
 
-        let decoder = JSONDecoder()
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw WeatherServiceError.serverError
+        }
+
         do {
-            let reports = try decoder.decode([PIREPReport].self, from: data)
-            return reports.filter { $0.coordinate != nil }
+            return try JSONDecoder().decode([PIREPReport].self, from: data)
         } catch {
-            // Try decoding as a wrapper object
-            if let wrapper = try? decoder.decode(PIREPWrapper.self, from: data) {
-                return wrapper.pireps?.filter { $0.coordinate != nil } ?? []
-            }
-            print("PIREP decode error: \(error)")
+            print("PIREP decode error for \(station): \(error)")
             return []
         }
     }
 
-    // MARK: - SIGMETs / AIRMETs
+    // MARK: - International SIGMETs (includes turbulence SIGMETs)
 
     func fetchAirSigmets() async throws -> [AirSigmet] {
-        let urlString = "\(baseURL)/airsigmet?format=json&hazard=turb"
+        let urlString = "\(baseURL)/isigmet?format=json"
         guard let url = URL(string: urlString) else {
             throw WeatherServiceError.invalidURL
         }
 
         let (data, response) = try await session.data(from: url)
 
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw WeatherServiceError.serverError
         }
 
-        if data.isEmpty { return [] }
-
-        let decoder = JSONDecoder()
-        do {
-            let sigmets = try decoder.decode([AirSigmet].self, from: data)
-            return sigmets.filter { $0.isTurbulence }
-        } catch {
-            if let wrapper = try? decoder.decode(AirSigmetWrapper.self, from: data) {
-                return wrapper.airsigmets?.filter { $0.isTurbulence } ?? []
-            }
-            print("AirSigmet decode error: \(error)")
+        if httpResponse.statusCode == 204 || data.isEmpty {
             return []
         }
-    }
 
-    // MARK: - G-AIRMETs
-
-    func fetchGAirmets() async throws -> [AirSigmet] {
-        let urlString = "\(baseURL)/gairmet?format=json&hazard=turb"
-        guard let url = URL(string: urlString) else {
-            throw WeatherServiceError.invalidURL
-        }
-
-        let (data, response) = try await session.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
+        guard (200...299).contains(httpResponse.statusCode) else {
             throw WeatherServiceError.serverError
         }
 
-        if data.isEmpty { return [] }
-
-        let decoder = JSONDecoder()
         do {
-            let airmets = try decoder.decode([AirSigmet].self, from: data)
-            return airmets
+            let allSigmets = try JSONDecoder().decode([AirSigmet].self, from: data)
+            return allSigmets.filter { $0.isTurbulence }
         } catch {
-            print("G-AIRMET decode error: \(error)")
+            print("SIGMET decode error: \(error)")
             return []
         }
     }
-}
-
-// MARK: - Wrapper types for API response
-
-private struct PIREPWrapper: Codable {
-    let pireps: [PIREPReport]?
-}
-
-private struct AirSigmetWrapper: Codable {
-    let airsigmets: [AirSigmet]?
 }
 
 // MARK: - Errors

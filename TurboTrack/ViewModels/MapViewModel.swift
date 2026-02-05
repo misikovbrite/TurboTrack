@@ -38,7 +38,7 @@ class MapViewModel: ObservableObject {
     var filteredSigmets: [AirSigmet] {
         guard altitudeFilterEnabled else { return airSigmets }
         return airSigmets.filter { sigmet in
-            guard let low = sigmet.altitudeLow, let high = sigmet.altitudeHigh else { return true }
+            guard let low = sigmet.base, let high = sigmet.top else { return true }
             return Double(high) >= altitudeFilterLow && Double(low) <= altitudeFilterHigh
         }
     }

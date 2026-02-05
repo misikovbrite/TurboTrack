@@ -16,7 +16,7 @@ struct ReportDetailSheet: View {
 
                         Spacer()
 
-                        Text(report.reportType ?? "PIREP")
+                        Text(report.pirepType ?? "PIREP")
                             .font(.caption)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -29,8 +29,8 @@ struct ReportDetailSheet: View {
                     // Details
                     detailRow(title: "Altitude", value: report.altitudeDisplay)
 
-                    if let base = report.turbulenceBaseAlt, let top = report.turbulenceTopAlt {
-                        detailRow(title: "Turb. Layer", value: "\(base.flightLevel) – \(top.flightLevel)")
+                    if let base = report.turbulenceBase1, let top = report.turbulenceTop1 {
+                        detailRow(title: "Turb. Layer", value: "FL\(String(format: "%03d", base)) – FL\(String(format: "%03d", top))")
                     }
 
                     if let aircraft = report.aircraftType, !aircraft.isEmpty {

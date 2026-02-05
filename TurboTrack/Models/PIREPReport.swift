@@ -1,168 +1,51 @@
 import Foundation
 import CoreLocation
 
-struct PIREPReport: Identifiable, Codable, Equatable {
+struct PIREPReport: Identifiable, Equatable {
     let id: UUID
     let receiptTime: String?
-    let observationTime: String?
+    let obsTime: Int?           // Unix timestamp
     let latitude: Double?
     let longitude: Double?
-    let altitudeFeet: Int?
+    let flightLevel: Int?       // Flight level (e.g. 350 = FL350)
     let aircraftType: String?
-    let turbulenceIntensity: String?
-    let turbulenceBaseAlt: Int?
-    let turbulenceTopAlt: Int?
+    let turbulenceIntensity1: String?
+    let turbulenceBase1: Int?
+    let turbulenceTop1: Int?
+    let turbulenceIntensity2: String?
+    let turbulenceBase2: Int?
+    let turbulenceTop2: Int?
     let icingIntensity: String?
     let rawText: String?
-    let reportType: String?
+    let pirepType: String?
 
     var severity: TurbulenceSeverity {
-        TurbulenceSeverity(from: turbulenceIntensity)
+        // Check both turbulence fields, take the worse one
+        let sev1 = TurbulenceSeverity(from: turbulenceIntensity1)
+        let sev2 = TurbulenceSeverity(from: turbulenceIntensity2)
+        return sev1.sortOrder >= sev2.sortOrder ? sev1 : sev2
     }
 
     var coordinate: CLLocationCoordinate2D? {
         guard let lat = latitude, let lon = longitude else { return nil }
+        guard lat >= -90, lat <= 90, lon >= -180, lon <= 180 else { return nil }
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 
     var observationDate: Date? {
-        observationTime?.iso8601Date
+        guard let obsTime = obsTime else { return nil }
+        return Date(timeIntervalSince1970: TimeInterval(obsTime))
+    }
+
+    /// Altitude in feet (flightLevel is in hundreds of feet)
+    var altitudeFeet: Int? {
+        guard let fl = flightLevel else { return nil }
+        return fl * 100
     }
 
     var altitudeDisplay: String {
-        guard let alt = altitudeFeet else { return "N/A" }
-        return "\(alt.flightLevel) (\(alt) ft)"
-    }
-
-    // Custom coding to handle API JSON
-    enum CodingKeys: String, CodingKey {
-        case receiptTime = "receipt_time"
-        case observationTime = "obs_time"
-        case latitude = "lat"
-        case longitude = "lon"
-        case altitudeFeet = "alt_ft"
-        case aircraftType = "acft"
-        case turbulenceIntensity = "turb_type"
-        case turbulenceBaseAlt = "turb_base"
-        case turbulenceTopAlt = "turb_top"
-        case icingIntensity = "ice_type"
-        case rawText = "raw"
-        case reportType = "rpt_type"
-    }
-
-    init(from decoder: Decoder) throws {
-        self.id = UUID()
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        receiptTime = try container.decodeIfPresent(String.self, forKey: .receiptTime)
-        observationTime = try container.decodeIfPresent(String.self, forKey: .observationTime)
-        rawText = try container.decodeIfPresent(String.self, forKey: .rawText)
-        aircraftType = try container.decodeIfPresent(String.self, forKey: .aircraftType)
-        reportType = try container.decodeIfPresent(String.self, forKey: .reportType)
-
-        // Handle latitude - could be Double or String
-        if let latDouble = try? container.decodeIfPresent(Double.self, forKey: .latitude) {
-            latitude = latDouble
-        } else if let latStr = try? container.decodeIfPresent(String.self, forKey: .latitude),
-                  let latVal = Double(latStr) {
-            latitude = latVal
-        } else {
-            latitude = nil
-        }
-
-        // Handle longitude
-        if let lonDouble = try? container.decodeIfPresent(Double.self, forKey: .longitude) {
-            longitude = lonDouble
-        } else if let lonStr = try? container.decodeIfPresent(String.self, forKey: .longitude),
-                  let lonVal = Double(lonStr) {
-            longitude = lonVal
-        } else {
-            longitude = nil
-        }
-
-        // Handle altitude
-        if let altInt = try? container.decodeIfPresent(Int.self, forKey: .altitudeFeet) {
-            altitudeFeet = altInt
-        } else if let altStr = try? container.decodeIfPresent(String.self, forKey: .altitudeFeet),
-                  let altVal = Int(altStr) {
-            altitudeFeet = altVal
-        } else {
-            altitudeFeet = nil
-        }
-
-        // Turbulence intensity - try multiple fields
-        if let turb = try? container.decodeIfPresent(String.self, forKey: .turbulenceIntensity) {
-            turbulenceIntensity = turb
-        } else {
-            turbulenceIntensity = nil
-        }
-
-        // Turbulence base/top
-        if let base = try? container.decodeIfPresent(Int.self, forKey: .turbulenceBaseAlt) {
-            turbulenceBaseAlt = base
-        } else if let baseStr = try? container.decodeIfPresent(String.self, forKey: .turbulenceBaseAlt),
-                  let baseVal = Int(baseStr) {
-            turbulenceBaseAlt = baseVal
-        } else {
-            turbulenceBaseAlt = nil
-        }
-
-        if let top = try? container.decodeIfPresent(Int.self, forKey: .turbulenceTopAlt) {
-            turbulenceTopAlt = top
-        } else if let topStr = try? container.decodeIfPresent(String.self, forKey: .turbulenceTopAlt),
-                  let topVal = Int(topStr) {
-            turbulenceTopAlt = topVal
-        } else {
-            turbulenceTopAlt = nil
-        }
-
-        icingIntensity = try container.decodeIfPresent(String.self, forKey: .icingIntensity)
-    }
-
-    // Manual initializer for previews/testing
-    init(
-        id: UUID = UUID(),
-        receiptTime: String? = nil,
-        observationTime: String? = nil,
-        latitude: Double? = nil,
-        longitude: Double? = nil,
-        altitudeFeet: Int? = nil,
-        aircraftType: String? = nil,
-        turbulenceIntensity: String? = nil,
-        turbulenceBaseAlt: Int? = nil,
-        turbulenceTopAlt: Int? = nil,
-        icingIntensity: String? = nil,
-        rawText: String? = nil,
-        reportType: String? = nil
-    ) {
-        self.id = id
-        self.receiptTime = receiptTime
-        self.observationTime = observationTime
-        self.latitude = latitude
-        self.longitude = longitude
-        self.altitudeFeet = altitudeFeet
-        self.aircraftType = aircraftType
-        self.turbulenceIntensity = turbulenceIntensity
-        self.turbulenceBaseAlt = turbulenceBaseAlt
-        self.turbulenceTopAlt = turbulenceTopAlt
-        self.icingIntensity = icingIntensity
-        self.rawText = rawText
-        self.reportType = reportType
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(receiptTime, forKey: .receiptTime)
-        try container.encodeIfPresent(observationTime, forKey: .observationTime)
-        try container.encodeIfPresent(latitude, forKey: .latitude)
-        try container.encodeIfPresent(longitude, forKey: .longitude)
-        try container.encodeIfPresent(altitudeFeet, forKey: .altitudeFeet)
-        try container.encodeIfPresent(aircraftType, forKey: .aircraftType)
-        try container.encodeIfPresent(turbulenceIntensity, forKey: .turbulenceIntensity)
-        try container.encodeIfPresent(turbulenceBaseAlt, forKey: .turbulenceBaseAlt)
-        try container.encodeIfPresent(turbulenceTopAlt, forKey: .turbulenceTopAlt)
-        try container.encodeIfPresent(icingIntensity, forKey: .icingIntensity)
-        try container.encodeIfPresent(rawText, forKey: .rawText)
-        try container.encodeIfPresent(reportType, forKey: .reportType)
+        guard let fl = flightLevel else { return "N/A" }
+        return "FL\(String(format: "%03d", fl)) (\(fl * 100) ft)"
     }
 
     static func == (lhs: PIREPReport, rhs: PIREPReport) -> Bool {
@@ -170,15 +53,92 @@ struct PIREPReport: Identifiable, Codable, Equatable {
     }
 
     static let sample = PIREPReport(
+        id: UUID(),
         receiptTime: "2024-01-15T12:00:00Z",
-        observationTime: "2024-01-15T11:45:00Z",
+        obsTime: 1770328260,
         latitude: 40.6413,
         longitude: -73.7781,
-        altitudeFeet: 35000,
+        flightLevel: 350,
         aircraftType: "B738",
-        turbulenceIntensity: "MOD",
-        turbulenceBaseAlt: 33000,
-        turbulenceTopAlt: 37000,
-        rawText: "UA /OV JFK/TM 1145/FL350/TP B738/TB MOD"
+        turbulenceIntensity1: "MOD",
+        turbulenceBase1: 330,
+        turbulenceTop1: 370,
+        turbulenceIntensity2: nil,
+        turbulenceBase2: nil,
+        turbulenceTop2: nil,
+        icingIntensity: nil,
+        rawText: "JFK UA /OV JFK/TM 1145/FL350/TP B738/TB MOD",
+        pirepType: "PIREP"
     )
+}
+
+// MARK: - Codable conformance matching aviationweather.gov API
+
+extension PIREPReport: Codable {
+    enum CodingKeys: String, CodingKey {
+        case receiptTime
+        case obsTime
+        case lat
+        case lon
+        case fltLvl
+        case acType
+        case tbInt1
+        case tbBas1
+        case tbTop1
+        case tbInt2
+        case tbBas2
+        case tbTop2
+        case icgInt1
+        case rawOb
+        case pirepType
+    }
+
+    init(from decoder: Decoder) throws {
+        self.id = UUID()
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+
+        receiptTime = try c.decodeIfPresent(String.self, forKey: .receiptTime)
+        obsTime = try c.decodeIfPresent(Int.self, forKey: .obsTime)
+        rawText = try c.decodeIfPresent(String.self, forKey: .rawOb)
+        aircraftType = try c.decodeIfPresent(String.self, forKey: .acType)
+        pirepType = try c.decodeIfPresent(String.self, forKey: .pirepType)
+
+        // Coordinates
+        latitude = try c.decodeIfPresent(Double.self, forKey: .lat)
+        longitude = try c.decodeIfPresent(Double.self, forKey: .lon)
+
+        // Flight level
+        flightLevel = try c.decodeIfPresent(Int.self, forKey: .fltLvl)
+
+        // Turbulence fields
+        turbulenceIntensity1 = try c.decodeIfPresent(String.self, forKey: .tbInt1)
+        turbulenceIntensity2 = try c.decodeIfPresent(String.self, forKey: .tbInt2)
+
+        // Base/top — can be Int or null
+        turbulenceBase1 = try c.decodeIfPresent(Int.self, forKey: .tbBas1)
+        turbulenceTop1 = try c.decodeIfPresent(Int.self, forKey: .tbTop1)
+        turbulenceBase2 = try c.decodeIfPresent(Int.self, forKey: .tbBas2)
+        turbulenceTop2 = try c.decodeIfPresent(Int.self, forKey: .tbTop2)
+
+        icingIntensity = try c.decodeIfPresent(String.self, forKey: .icgInt1)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encodeIfPresent(receiptTime, forKey: .receiptTime)
+        try c.encodeIfPresent(obsTime, forKey: .obsTime)
+        try c.encodeIfPresent(latitude, forKey: .lat)
+        try c.encodeIfPresent(longitude, forKey: .lon)
+        try c.encodeIfPresent(flightLevel, forKey: .fltLvl)
+        try c.encodeIfPresent(aircraftType, forKey: .acType)
+        try c.encodeIfPresent(turbulenceIntensity1, forKey: .tbInt1)
+        try c.encodeIfPresent(turbulenceBase1, forKey: .tbBas1)
+        try c.encodeIfPresent(turbulenceTop1, forKey: .tbTop1)
+        try c.encodeIfPresent(turbulenceIntensity2, forKey: .tbInt2)
+        try c.encodeIfPresent(turbulenceBase2, forKey: .tbBas2)
+        try c.encodeIfPresent(turbulenceTop2, forKey: .tbTop2)
+        try c.encodeIfPresent(icingIntensity, forKey: .icgInt1)
+        try c.encodeIfPresent(rawText, forKey: .rawOb)
+        try c.encodeIfPresent(pirepType, forKey: .pirepType)
+    }
 }

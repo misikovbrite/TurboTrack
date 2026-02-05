@@ -36,8 +36,8 @@ struct ReportRow: View {
                 }
 
                 HStack {
-                    if let alt = report.altitudeFeet {
-                        Label(alt.flightLevel, systemImage: "arrow.up.right")
+                    if let fl = report.flightLevel {
+                        Label("FL\(String(format: "%03d", fl))", systemImage: "arrow.up.right")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
