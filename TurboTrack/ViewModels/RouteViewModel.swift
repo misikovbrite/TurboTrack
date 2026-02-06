@@ -3,8 +3,8 @@ import MapKit
 
 @MainActor
 class RouteViewModel: ObservableObject {
-    @Published var departureCode = ""
-    @Published var arrivalCode = ""
+    @Published var departureText = ""
+    @Published var arrivalText = ""
     @Published var departureAirport: Airport?
     @Published var arrivalAirport: Airport?
     @Published var routePireps: [PIREPReport] = []
@@ -12,12 +12,16 @@ class RouteViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var showRoute = false
 
-    @Published var cameraPosition: MapCameraPosition = .region(
+    // Suggestions
+    @Published var departureSuggestions: [Airport] = []
+    @Published var arrivalSuggestions: [Airport] = []
+
+    @Published var cameraPosition: MapCameraPosition = .userLocation(fallback: .region(
         MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 39.8283, longitude: -98.5795),
-            span: MKCoordinateSpan(latitudeDelta: 40, longitudeDelta: 40)
+            center: CLLocationCoordinate2D(latitude: 41.3851, longitude: 2.1734),
+            span: MKCoordinateSpan(latitudeDelta: 30, longitudeDelta: 30)
         )
-    )
+    ))
 
     private let weatherService = AviationWeatherService.shared
 
@@ -41,27 +45,61 @@ class RouteViewModel: ObservableObject {
         return "\(routePireps.count) reports: \(parts.joined(separator: ", "))"
     }
 
+    // MARK: - Suggestions
+
+    func updateDepartureSuggestions() {
+        if departureAirport != nil && departureText == departureAirport?.displayName {
+            departureSuggestions = []
+            return
+        }
+        departureSuggestions = Airport.search(departureText)
+    }
+
+    func updateArrivalSuggestions() {
+        if arrivalAirport != nil && arrivalText == arrivalAirport?.displayName {
+            arrivalSuggestions = []
+            return
+        }
+        arrivalSuggestions = Airport.search(arrivalText)
+    }
+
+    func selectDeparture(_ airport: Airport) {
+        departureAirport = airport
+        departureText = airport.displayName
+        departureSuggestions = []
+    }
+
+    func selectArrival(_ airport: Airport) {
+        arrivalAirport = airport
+        arrivalText = airport.displayName
+        arrivalSuggestions = []
+    }
+
+    // MARK: - Search
+
     func searchRoute() async {
-        let depCode = departureCode.uppercased().trimmingCharacters(in: .whitespaces)
-        let arrCode = arrivalCode.uppercased().trimmingCharacters(in: .whitespaces)
+        // Resolve airports from text
+        if departureAirport == nil {
+            departureAirport = Airport.findByQuery(departureText)
+        }
+        if arrivalAirport == nil {
+            arrivalAirport = Airport.findByQuery(arrivalText)
+        }
 
-        guard !depCode.isEmpty, !arrCode.isEmpty else {
-            errorMessage = "Please enter both departure and arrival ICAO codes"
+        guard let dep = departureAirport else {
+            errorMessage = "Can't find departure airport for '\(departureText)'"
+            return
+        }
+        guard let arr = arrivalAirport else {
+            errorMessage = "Can't find arrival airport for '\(arrivalText)'"
             return
         }
 
-        guard let dep = Airport.find(icao: depCode) else {
-            errorMessage = "Departure airport '\(depCode)' not found"
-            return
-        }
+        departureText = dep.displayName
+        arrivalText = arr.displayName
+        departureSuggestions = []
+        arrivalSuggestions = []
 
-        guard let arr = Airport.find(icao: arrCode) else {
-            errorMessage = "Arrival airport '\(arrCode)' not found"
-            return
-        }
-
-        departureAirport = dep
-        arrivalAirport = arr
         isLoading = true
         errorMessage = nil
 
@@ -123,7 +161,6 @@ class RouteViewModel: ObservableObject {
         let ab = b.distance(from: a)
         guard ab > 0 else { return p.distance(from: a) }
 
-        // Project point onto line segment
         let ap_lat = point.latitude - lineStart.latitude
         let ap_lon = point.longitude - lineStart.longitude
         let ab_lat = lineEnd.latitude - lineStart.latitude
@@ -139,19 +176,21 @@ class RouteViewModel: ObservableObject {
     }
 
     func clearRoute() {
-        departureCode = ""
-        arrivalCode = ""
+        departureText = ""
+        arrivalText = ""
         departureAirport = nil
         arrivalAirport = nil
         routePireps = []
         showRoute = false
         errorMessage = nil
+        departureSuggestions = []
+        arrivalSuggestions = []
 
-        cameraPosition = .region(
+        cameraPosition = .userLocation(fallback: .region(
             MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: 39.8283, longitude: -98.5795),
-                span: MKCoordinateSpan(latitudeDelta: 40, longitudeDelta: 40)
+                center: CLLocationCoordinate2D(latitude: 41.3851, longitude: 2.1734),
+                span: MKCoordinateSpan(latitudeDelta: 30, longitudeDelta: 30)
             )
-        )
+        ))
     }
 }
