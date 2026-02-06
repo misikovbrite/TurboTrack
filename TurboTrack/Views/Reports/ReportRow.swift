@@ -4,60 +4,82 @@ struct ReportRow: View {
     let report: PIREPReport
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Severity indicator
-            Circle()
-                .fill(report.severity.color)
-                .frame(width: 12, height: 12)
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(report.severity.displayName)
-                        .font(.subheadline.bold())
+        VStack(alignment: .leading, spacing: 10) {
+            // Top row: severity + aircraft + time
+            HStack(alignment: .center) {
+                // Severity badge
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(report.severity.color)
+                        .frame(width: 10, height: 10)
+                    Text(report.severity.displayName.uppercased())
+                        .font(.caption.bold())
                         .foregroundColor(report.severity.color)
-
-                    if let aircraft = report.aircraftType, !aircraft.isEmpty {
-                        Text(aircraft)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color(.systemGray6))
-                            .clipShape(Capsule())
-                    }
-
-                    Spacer()
-
-                    if let time = report.observationDate {
-                        Text(time.relativeString)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
                 }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(report.severity.color.opacity(0.12))
+                .clipShape(Capsule())
 
-                HStack {
-                    if let fl = report.flightLevel {
-                        Label("FL\(String(format: "%03d", fl))", systemImage: "arrow.up.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                    if let lat = report.latitude, let lon = report.longitude {
-                        Text(String(format: "%.1f, %.1f", lat, lon))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                if let raw = report.rawText {
-                    Text(raw)
-                        .font(.system(.caption2, design: .monospaced))
+                if let aircraft = report.aircraftType, !aircraft.isEmpty {
+                    Text(aircraft)
+                        .font(.caption.bold())
                         .foregroundColor(.secondary)
-                        .lineLimit(1)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(Capsule())
+                }
+
+                Spacer()
+
+                if let time = report.observationDate {
+                    Text(time.relativeString)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
+
+            // Info row: altitude + coordinates
+            HStack(spacing: 16) {
+                if let fl = report.flightLevel {
+                    Label {
+                        Text("FL\(String(format: "%03d", fl))")
+                            .font(.caption)
+                    } icon: {
+                        Image(systemName: "airplane")
+                            .font(.caption2)
+                    }
+                    .foregroundColor(.primary)
+                }
+
+                if let lat = report.latitude, let lon = report.longitude {
+                    Label {
+                        Text(String(format: "%.2f, %.2f", lat, lon))
+                            .font(.caption)
+                    } icon: {
+                        Image(systemName: "location")
+                            .font(.caption2)
+                    }
+                    .foregroundColor(.secondary)
+                }
+
+                Spacer()
+            }
+
+            // Raw text
+            if let raw = report.rawText, !raw.isEmpty {
+                Text(raw)
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+                    .padding(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.tertiarySystemFill))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
     }
 }
 
