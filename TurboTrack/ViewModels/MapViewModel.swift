@@ -16,16 +16,21 @@ class MapViewModel: ObservableObject {
     @Published var altitudeFilterHigh: Double = 45000
     @Published var altitudeFilterEnabled = false
 
-    // Camera position — default to US center
-    @Published var cameraPosition: MapCameraPosition = .region(
+    // Camera — start with userLocation, fallback handled in init
+    @Published var cameraPosition: MapCameraPosition = .userLocation(fallback: .region(
         MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 39.8283, longitude: -98.5795),
-            span: MKCoordinateSpan(latitudeDelta: 40, longitudeDelta: 40)
+            center: CLLocationCoordinate2D(latitude: 41.3851, longitude: 2.1734), // Barcelona
+            span: MKCoordinateSpan(latitudeDelta: 30, longitudeDelta: 30)
         )
-    )
+    ))
 
+    let locationService = LocationService()
     private let weatherService = AviationWeatherService.shared
     private var refreshTimer: Timer?
+
+    init() {
+        locationService.requestPermission()
+    }
 
     var filteredPireps: [PIREPReport] {
         guard altitudeFilterEnabled else { return pireps }

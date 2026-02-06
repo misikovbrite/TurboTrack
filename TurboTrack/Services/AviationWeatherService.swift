@@ -14,12 +14,20 @@ actor AviationWeatherService {
     }
 
     // MARK: - PIREPs
-    // Requires either bbox or id+dist parameter
-    // Uses multiple station queries to cover continental US
+    // Uses stations worldwide to cover major regions
 
     func fetchPIREPs(hoursBack: Int = 6) async throws -> [PIREPReport] {
-        // Query multiple major stations to cover the US
-        let stations = ["KJFK", "KLAX", "KORD", "KATL", "KDEN", "KDFW", "KSFO", "KSEA", "KMIA", "KBOS"]
+        // US + Europe + other major hubs
+        let stations = [
+            // US
+            "KJFK", "KLAX", "KORD", "KATL", "KDEN", "KDFW", "KSFO", "KSEA", "KMIA", "KBOS",
+            // Europe
+            "LEBL", "EGLL", "LFPG", "EDDF", "EHAM", "LIRF", "LEMD", "EDDM", "LSZH", "EKCH",
+            "ENGM", "ESSA", "EFHK", "LPPT", "EPWA", "LOWW", "LKPR",
+            // Other
+            "RJTT", "VHHH", "WSSS", "OMDB", "CYYZ", "MMMX", "SBGR"
+        ]
+
         var allReports: [PIREPReport] = []
 
         await withTaskGroup(of: [PIREPReport].self) { group in
@@ -28,7 +36,6 @@ actor AviationWeatherService {
                     do {
                         return try await self.fetchPIREPsForStation(station: station, hoursBack: hoursBack, distance: 500)
                     } catch {
-                        print("Failed to fetch PIREPs for \(station): \(error)")
                         return []
                     }
                 }
