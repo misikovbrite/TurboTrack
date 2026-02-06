@@ -107,11 +107,28 @@ actor AviationWeatherService {
             throw WeatherServiceError.serverError
         }
 
+        // Decode element by element — one bad SIGMET shouldn't break all
         do {
-            let allSigmets = try JSONDecoder().decode([AirSigmet].self, from: data)
-            return allSigmets.filter { $0.isTurbulence }
+            let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] ?? []
+            var results: [AirSigmet] = []
+            let decoder = JSONDecoder()
+
+            for item in jsonArray {
+                do {
+                    let itemData = try JSONSerialization.data(withJSONObject: item)
+                    let sigmet = try decoder.decode(AirSigmet.self, from: itemData)
+                    if sigmet.isTurbulence {
+                        results.append(sigmet)
+                    }
+                } catch {
+                    // Skip this one, continue with others
+                    continue
+                }
+            }
+
+            return results
         } catch {
-            print("SIGMET decode error: \(error)")
+            print("SIGMET JSON error: \(error)")
             return []
         }
     }

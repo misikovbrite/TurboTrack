@@ -4,6 +4,30 @@ import CoreLocation
 struct SigmetCoord: Codable {
     let lat: Double
     let lon: Double
+
+    init(lat: Double, lon: Double) {
+        self.lat = lat
+        self.lon = lon
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        // Handle both Int and Double from JSON
+        if let d = try? c.decode(Double.self, forKey: .lat) {
+            lat = d
+        } else {
+            lat = Double(try c.decode(Int.self, forKey: .lat))
+        }
+        if let d = try? c.decode(Double.self, forKey: .lon) {
+            lon = d
+        } else {
+            lon = Double(try c.decode(Int.self, forKey: .lon))
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case lat, lon
+    }
 }
 
 struct AirSigmet: Identifiable, Equatable {
@@ -12,17 +36,16 @@ struct AirSigmet: Identifiable, Equatable {
     let firId: String?
     let firName: String?
     let receiptTime: String?
-    let validTimeFrom: Int?      // Unix timestamp
-    let validTimeTo: Int?        // Unix timestamp
+    let validTimeFrom: Int?
+    let validTimeTo: Int?
     let hazard: String?
     let qualifier: String?
-    let base: Int?               // altitude in feet
-    let top: Int?                // altitude in feet
+    let base: Int?
+    let top: Int?
     let coords: [SigmetCoord]?
     let rawSigmet: String?
 
     var turbulenceSeverity: TurbulenceSeverity {
-        // qualifier often contains severity info (e.g. "SEV")
         let qualSev = TurbulenceSeverity(from: qualifier)
         if qualSev != .none { return qualSev }
         return TurbulenceSeverity(from: hazard)
@@ -61,18 +84,18 @@ struct AirSigmet: Identifiable, Equatable {
 
     static let sample = AirSigmet(
         id: UUID(),
-        icaoId: "YMRF",
-        firId: "YMMM",
-        firName: "YMMM MELBOURNE",
-        receiptTime: "2026-02-05T16:15:06Z",
-        validTimeFrom: 1770318000,
-        validTimeTo: 1770332400,
+        icaoId: "LEMM",
+        firId: "LECB",
+        firName: "LECB BARCELONA",
+        receiptTime: "2026-02-06T16:53:53Z",
+        validTimeFrom: 1770400800,
+        validTimeTo: 1770411600,
         hazard: "TURB",
         qualifier: "SEV",
-        base: 0,
-        top: 5000,
-        coords: [SigmetCoord(lat: -43, lon: 147.167), SigmetCoord(lat: -43.667, lon: 147), SigmetCoord(lat: -43.667, lon: 146.5), SigmetCoord(lat: -43, lon: 146.5)],
-        rawSigmet: "SIGMET S01 VALID 051900/052300 YMRF- SEV TURB"
+        base: 20000,
+        top: 32000,
+        coords: [SigmetCoord(lat: 39.65, lon: -1.083), SigmetCoord(lat: 42.133, lon: 3.95), SigmetCoord(lat: 42.017, lon: 4.55), SigmetCoord(lat: 39.683, lon: 4.5)],
+        rawSigmet: "LECB SIGMET 9 VALID 061800/062100 LEVA- SEV TURB FL200/320"
     )
 }
 
@@ -100,8 +123,19 @@ extension AirSigmet: Codable {
         validTimeTo = try c.decodeIfPresent(Int.self, forKey: .validTimeTo)
         hazard = try c.decodeIfPresent(String.self, forKey: .hazard)
         qualifier = try c.decodeIfPresent(String.self, forKey: .qualifier)
-        base = try c.decodeIfPresent(Int.self, forKey: .base)
-        top = try c.decodeIfPresent(Int.self, forKey: .top)
+
+        // base/top can be Int or null
+        if let b = try? c.decodeIfPresent(Int.self, forKey: .base) {
+            base = b
+        } else {
+            base = nil
+        }
+        if let t = try? c.decodeIfPresent(Int.self, forKey: .top) {
+            top = t
+        } else {
+            top = nil
+        }
+
         coords = try c.decodeIfPresent([SigmetCoord].self, forKey: .coords)
         rawSigmet = try c.decodeIfPresent(String.self, forKey: .rawSigmet)
     }
