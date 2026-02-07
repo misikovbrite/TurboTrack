@@ -101,6 +101,20 @@ struct SettingsView: View {
                     .padding(.vertical, 2)
                 }
 
+                Section("Support") {
+                    Button {
+                        openMail()
+                    } label: {
+                        HStack {
+                            Label("Contact Developers", systemImage: "envelope.fill")
+                            Spacer()
+                            Text("hello@britetodo.com")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
                 Section("About") {
                     HStack {
                         Text("Version")
@@ -112,7 +126,7 @@ struct SettingsView: View {
                     HStack {
                         Text("App")
                         Spacer()
-                        Text("TurboTrack")
+                        Text("Turbulence Forecast")
                             .foregroundColor(.secondary)
                     }
 
@@ -130,6 +144,14 @@ struct SettingsView: View {
             .task {
                 pendingCount = await notificationService.pendingCount()
             }
+        }
+    }
+    private func openMail() {
+        let subject = "Turbulence Forecast — Feedback"
+        let email = "hello@britetodo.com"
+        let urlString = "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? subject)"
+        if let url = URL(string: urlString) {
+            UIApplication.shared.open(url)
         }
     }
 }

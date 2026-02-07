@@ -31,11 +31,13 @@ struct RouteInputView: View {
 
                     // Input card
                     inputCard
+                        .frame(maxWidth: 560)
                         .padding(.horizontal, 20)
 
                     // Suggestions
                     if !currentSuggestions.isEmpty {
                         suggestionsView
+                            .frame(maxWidth: 560)
                             .padding(.horizontal, 20)
                             .padding(.top, 4)
                             .transition(.opacity.combined(with: .move(edge: .top)))

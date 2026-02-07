@@ -103,12 +103,12 @@ struct TurbulenceMapView: View {
             .sheet(isPresented: $viewModel.showDetail) {
                 if let report = viewModel.selectedReport {
                     ReportDetailSheet(report: report)
-                        .presentationDetents([.medium])
+                        .presentationDetents([.medium, .large])
                 }
             }
             .sheet(isPresented: $showFilters) {
                 altitudeFilterSheet
-                    .presentationDetents([.height(280)])
+                    .presentationDetents([.medium])
             }
             .task {
                 await viewModel.loadData()

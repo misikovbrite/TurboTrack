@@ -41,6 +41,9 @@ struct OnboardingView: View {
 
     private let totalSteps = 13 // 0-12
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    private var isIPad: Bool { horizontalSizeClass == .regular }
+
     // Theme
     private let accent = Color(red: 0.20, green: 0.50, blue: 0.95)
     private let accentLight = Color(red: 0.40, green: 0.65, blue: 1.0)
@@ -184,18 +187,16 @@ struct OnboardingView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 36, style: .continuous)
                         .fill(accent.opacity(0.2))
-                        .frame(width: 140, height: 140)
+                        .frame(width: 160, height: 160)
                         .blur(radius: 20)
                         .scaleEffect(pulseScale)
 
-                    RoundedRectangle(cornerRadius: 32, style: .continuous)
-                        .fill(LinearGradient(colors: [accent, accentLight], startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: 120, height: 120)
+                    Image("AppLogo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 140, height: 140)
+                        .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
                         .shadow(color: accent.opacity(0.4), radius: 24, x: 0, y: 12)
-
-                    Image(systemName: "airplane")
-                        .font(.system(size: 52, weight: .medium))
-                        .foregroundColor(.white)
                 }
                 .scaleEffect(iconScale)
                 .opacity(iconOpacity)
@@ -966,63 +967,66 @@ struct OnboardingView: View {
         ZStack {
             Color(red: 0.04, green: 0.06, blue: 0.12).ignoresSafeArea()
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    Spacer().frame(height: 80)
+            GeometryReader { geo in
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        Spacer().frame(height: 80)
 
-                    Text("Preparing Your\nForecast Engine")
-                        .font(.system(size: 38, weight: .bold, design: .serif))
-                        .foregroundColor(creamColor)
-                        .multilineTextAlignment(.center)
-                        .scaleEffect(x: 0.85, y: 1.0)
+                        Text("Preparing Your\nForecast Engine")
+                            .font(.system(size: isIPad ? 48 : 38, weight: .bold, design: .serif))
+                            .foregroundColor(creamColor)
+                            .multilineTextAlignment(.center)
+                            .scaleEffect(x: 0.85, y: 1.0)
 
-                    Spacer().frame(height: 40)
+                        Spacer().frame(height: 40)
 
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.white.opacity(0.15))
-                            .frame(height: 16)
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(creamColor)
-                            .frame(width: max(0, (UIScreen.main.bounds.width - 80) * setupProgress), height: 12)
-                            .padding(.leading, 2)
-                    }
-                    .padding(.horizontal, 32)
-
-                    Spacer().frame(height: 32)
-
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(0..<4, id: \.self) { i in
-                            darkSetupStepRow(
-                                text: setupSteps[i],
-                                isActive: currentSetupStepIndex == i,
-                                isCompleted: setupStepsCompleted[i]
-                            )
+                        let barWidth = min(geo.size.width - 80, 600)
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.white.opacity(0.15))
+                                .frame(width: barWidth, height: 16)
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(creamColor)
+                                .frame(width: max(0, barWidth * setupProgress), height: 12)
+                                .padding(.leading, 2)
                         }
-                    }
-                    .padding(.horizontal, 40)
 
-                    Spacer().frame(height: 60)
+                        Spacer().frame(height: 32)
 
-                    if showSetupStats {
-                        VStack(spacing: 8) {
-                            Text("Trusted by")
-                                .font(.system(size: 18))
-                                .foregroundColor(creamColor.opacity(0.7))
-                            Text("Travelers & Pilots")
-                                .font(.system(size: 32, weight: .bold, design: .serif))
-                                .foregroundColor(creamColor)
+                        VStack(alignment: .leading, spacing: 16) {
+                            ForEach(0..<4, id: \.self) { i in
+                                darkSetupStepRow(
+                                    text: setupSteps[i],
+                                    isActive: currentSetupStepIndex == i,
+                                    isCompleted: setupStepsCompleted[i]
+                                )
+                            }
                         }
-                        .transition(.opacity.combined(with: .scale))
+                        .padding(.horizontal, 40)
 
-                        Spacer().frame(height: 24)
-                        darkTestimonialsCarousel
+                        Spacer().frame(height: 60)
+
+                        if showSetupStats {
+                            VStack(spacing: 8) {
+                                Text("Trusted by")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(creamColor.opacity(0.7))
+                                Text("Travelers & Pilots")
+                                    .font(.system(size: isIPad ? 40 : 32, weight: .bold, design: .serif))
+                                    .foregroundColor(creamColor)
+                            }
+                            .transition(.opacity.combined(with: .scale))
+
+                            Spacer().frame(height: 24)
+                            darkTestimonialsCarousel
+                        }
+
+                        Spacer().frame(height: 50)
                     }
-
-                    Spacer().frame(height: 50)
+                    .frame(maxWidth: isIPad ? 700 : 520)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: geo.size.height)
                 }
-                .frame(maxWidth: 520)
-                .frame(maxWidth: .infinity)
             }
         }
     }
@@ -1079,7 +1083,7 @@ struct OnboardingView: View {
                 .font(.system(size: 14, weight: .medium)).foregroundColor(creamColor.opacity(0.6))
         }
         .padding(20)
-        .frame(width: 280)
+        .frame(width: isIPad ? 340 : 280)
         .background(Color.white.opacity(0.1))
         .cornerRadius(16)
     }
@@ -1121,7 +1125,7 @@ struct OnboardingView: View {
                     Text("Get Started")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
-                        .frame(maxWidth: 340)
+                        .frame(maxWidth: isIPad ? 440 : 340)
                         .frame(height: 64)
                         .background(Color.black)
                         .cornerRadius(32)
@@ -1171,7 +1175,7 @@ struct OnboardingView: View {
         GeometryReader { geo in
             ScrollView(showsIndicators: false) {
                 content()
-                    .frame(maxWidth: 520)
+                    .frame(maxWidth: isIPad ? 700 : 520)
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: geo.size.height)
             }
@@ -1183,7 +1187,7 @@ struct OnboardingView: View {
             Text("Continue")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
-                .frame(maxWidth: 340)
+                .frame(maxWidth: isIPad ? 440 : 340)
                 .frame(height: 64)
                 .background(disabled ? Color.gray : accent)
                 .cornerRadius(32)

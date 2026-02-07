@@ -3,6 +3,7 @@ import MapKit
 
 struct ForecastResultView: View {
     @ObservedObject var viewModel: RouteViewModel
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         ScrollView {
@@ -29,6 +30,8 @@ struct ForecastResultView: View {
 
                 disclaimerText
             }
+            .frame(maxWidth: 700)
+            .frame(maxWidth: .infinity)
             .padding()
         }
         .background(Color(.systemGroupedBackground))
@@ -96,7 +99,7 @@ struct ForecastResultView: View {
                 .foregroundColor(.secondary)
 
             RouteMapView(viewModel: viewModel)
-                .frame(height: 260)
+                .frame(height: horizontalSizeClass == .regular ? 400 : 260)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .padding(16)
