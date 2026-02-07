@@ -4,47 +4,53 @@ struct RouteInputView: View {
     @StateObject private var viewModel = RouteViewModel()
     @FocusState private var focusedField: RouteField?
 
-    enum RouteField {
-        case departure, arrival
-    }
+    enum RouteField { case departure, arrival }
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .top) {
-                // Map background
-                RouteMapView(viewModel: viewModel)
-                    .ignoresSafeArea(edges: .bottom)
-                    .onTapGesture {
-                        focusedField = nil
-                    }
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                    .onTapGesture { focusedField = nil }
 
-                // Floating input card + suggestions
                 VStack(spacing: 0) {
-                    inputCard
-                        .padding(.horizontal)
-                        .padding(.top, 8)
+                    Spacer()
 
-                    // Suggestions dropdown
+                    // Header
+                    VStack(spacing: 10) {
+                        Image(systemName: "airplane")
+                            .font(.system(size: 44))
+                            .foregroundStyle(.blue)
+                        Text("Where are you flying?")
+                            .font(.title3.bold())
+                        Text("Check turbulence forecast for your route")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.bottom, 28)
+
+                    // Input card
+                    inputCard
+                        .padding(.horizontal, 20)
+
+                    // Suggestions
                     if !currentSuggestions.isEmpty {
                         suggestionsView
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
+                            .padding(.top, 4)
                             .transition(.opacity.combined(with: .move(edge: .top)))
                     }
 
-                    if viewModel.showRoute {
-                        summaryCard
-                            .padding(.horizontal)
-                            .padding(.top, 8)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                    }
-
+                    Spacer()
                     Spacer()
                 }
                 .animation(.easeInOut(duration: 0.2), value: currentSuggestions.count)
             }
-            .navigationTitle("Flight Route")
+            .navigationTitle("Turbulence Forecast")
             .navigationBarTitleDisplayMode(.inline)
-            .animation(.easeInOut(duration: 0.3), value: viewModel.showRoute)
+            .navigationDestination(isPresented: $viewModel.showRoute) {
+                ForecastResultView(viewModel: viewModel)
+            }
         }
     }
 
@@ -59,23 +65,17 @@ struct RouteInputView: View {
     // MARK: - Input Card
 
     private var inputCard: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 16) {
             HStack(spacing: 10) {
                 // Route dots
                 VStack(spacing: 6) {
-                    Circle()
-                        .fill(.green)
-                        .frame(width: 8, height: 8)
-                    Rectangle()
-                        .fill(.secondary.opacity(0.3))
-                        .frame(width: 2, height: 20)
-                    Circle()
-                        .fill(.red)
-                        .frame(width: 8, height: 8)
+                    Circle().fill(.green).frame(width: 8, height: 8)
+                    Rectangle().fill(.secondary.opacity(0.3)).frame(width: 2, height: 20)
+                    Circle().fill(.red).frame(width: 8, height: 8)
                 }
 
                 VStack(spacing: 8) {
-                    TextField("City or ICAO — Barcelona, KJFK...", text: $viewModel.departureText)
+                    TextField("From — New York, KJFK...", text: $viewModel.departureText)
                         .autocorrectionDisabled()
                         .font(.subheadline)
                         .padding(.horizontal, 12)
@@ -90,7 +90,7 @@ struct RouteInputView: View {
                             viewModel.updateDepartureSuggestions()
                         }
 
-                    TextField("City or ICAO — London, KLAX...", text: $viewModel.arrivalText)
+                    TextField("To — London, EGLL...", text: $viewModel.arrivalText)
                         .autocorrectionDisabled()
                         .font(.subheadline)
                         .padding(.horizontal, 12)
@@ -108,28 +108,29 @@ struct RouteInputView: View {
                             viewModel.updateArrivalSuggestions()
                         }
                 }
-
-                // Search button
-                Button {
-                    focusedField = nil
-                    Task { await viewModel.searchRoute() }
-                } label: {
-                    Group {
-                        if viewModel.isLoading {
-                            ProgressView()
-                                .tint(.white)
-                        } else {
-                            Image(systemName: "paperplane.fill")
-                                .font(.body)
-                        }
-                    }
-                    .frame(width: 44, height: 44)
-                    .background(.blue)
-                    .foregroundColor(.white)
-                    .clipShape(Circle())
-                }
-                .disabled(viewModel.isLoading || viewModel.departureText.isEmpty || viewModel.arrivalText.isEmpty)
             }
+
+            // Search button
+            Button {
+                focusedField = nil
+                Task { await viewModel.searchRoute() }
+            } label: {
+                HStack(spacing: 8) {
+                    if viewModel.isLoading {
+                        ProgressView().tint(.white)
+                    } else {
+                        Image(systemName: "paperplane.fill")
+                        Text("Check Turbulence")
+                            .fontWeight(.semibold)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(canSearch ? .blue : .blue.opacity(0.4))
+                .foregroundColor(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .disabled(!canSearch)
 
             if let error = viewModel.errorMessage {
                 Text(error)
@@ -137,21 +138,15 @@ struct RouteInputView: View {
                     .foregroundColor(.red)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-
-            if viewModel.showRoute {
-                Button(role: .destructive) {
-                    viewModel.clearRoute()
-                } label: {
-                    Label("Clear Route", systemImage: "xmark")
-                        .font(.caption)
-                }
-                .frame(maxWidth: .infinity, alignment: .trailing)
-            }
         }
-        .padding(16)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.15), radius: 10, y: 5)
+        .padding(20)
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.08), radius: 16, y: 8)
+    }
+
+    private var canSearch: Bool {
+        !viewModel.isLoading && !viewModel.departureText.isEmpty && !viewModel.arrivalText.isEmpty
     }
 
     // MARK: - Suggestions
@@ -205,61 +200,6 @@ struct RouteInputView: View {
         case nil:
             break
         }
-    }
-
-    // MARK: - Summary Card
-
-    private var summaryCard: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(turbulenceColor.opacity(0.15))
-                    .frame(width: 40, height: 40)
-                Image(systemName: turbulenceIcon)
-                    .font(.title3)
-                    .foregroundColor(turbulenceColor)
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(routeTitle)
-                    .font(.subheadline.bold())
-                Text(viewModel.turbulenceSummary)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-        }
-        .padding(14)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
-    }
-
-    // MARK: - Helpers
-
-    private var routeTitle: String {
-        let dep = viewModel.departureAirport?.icao ?? viewModel.departureText
-        let arr = viewModel.arrivalAirport?.icao ?? viewModel.arrivalText
-        return "\(dep) → \(arr)"
-    }
-
-    private var turbulenceIcon: String {
-        if viewModel.routePireps.isEmpty { return "checkmark.circle.fill" }
-        let hasSevere = viewModel.routePireps.contains { $0.severity == .severe || $0.severity == .extreme }
-        let hasModerate = viewModel.routePireps.contains { $0.severity == .moderate }
-        if hasSevere { return "exclamationmark.triangle.fill" }
-        if hasModerate { return "exclamationmark.circle.fill" }
-        return "info.circle.fill"
-    }
-
-    private var turbulenceColor: Color {
-        if viewModel.routePireps.isEmpty { return .green }
-        let hasSevere = viewModel.routePireps.contains { $0.severity == .severe || $0.severity == .extreme }
-        let hasModerate = viewModel.routePireps.contains { $0.severity == .moderate }
-        if hasSevere { return .red }
-        if hasModerate { return .orange }
-        return .yellow
     }
 }
 

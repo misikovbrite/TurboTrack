@@ -40,7 +40,18 @@ struct RouteMapView: View {
                 }
             }
 
-            // Turbulence points along route
+            // Forecast turbulence points along route
+            ForEach(viewModel.forecastMapPoints) { point in
+                Annotation(
+                    point.severity.displayName,
+                    coordinate: point.coordinate,
+                    anchor: .center
+                ) {
+                    TurbulenceAnnotation(severity: point.severity)
+                }
+            }
+
+            // Current PIREP points (shown alongside forecast)
             ForEach(viewModel.routePireps) { report in
                 if let coord = report.coordinate {
                     Annotation(

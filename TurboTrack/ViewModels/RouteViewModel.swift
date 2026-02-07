@@ -3,19 +3,26 @@ import MapKit
 
 @MainActor
 class RouteViewModel: ObservableObject {
+
+    // MARK: - Input
+
     @Published var departureText = ""
     @Published var arrivalText = ""
     @Published var departureAirport: Airport?
     @Published var arrivalAirport: Airport?
-    @Published var routePireps: [PIREPReport] = []
+    @Published var departureSuggestions: [Airport] = []
+    @Published var arrivalSuggestions: [Airport] = []
+
+    // MARK: - State
+
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var showRoute = false
 
-    // Suggestions
-    @Published var departureSuggestions: [Airport] = []
-    @Published var arrivalSuggestions: [Airport] = []
+    // MARK: - Results
 
+    @Published var routePireps: [PIREPReport] = []
+    @Published var forecast: TurbulenceForecast?
     @Published var cameraPosition: MapCameraPosition = .userLocation(fallback: .region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 41.3851, longitude: 2.1734),
@@ -24,24 +31,104 @@ class RouteViewModel: ObservableObject {
     ))
 
     private let weatherService = AviationWeatherService.shared
+    private let forecastService = TurbulenceForecastService.shared
+
+    // MARK: - Computed: Route
 
     var routePolyline: [CLLocationCoordinate2D] {
         guard let dep = departureAirport, let arr = arrivalAirport else { return [] }
         return [dep.coordinate, arr.coordinate]
     }
 
-    var turbulenceSummary: String {
-        guard !routePireps.isEmpty else { return "No turbulence reports along route" }
+    var routeTitle: String {
+        let dep = departureAirport?.icao ?? "???"
+        let arr = arrivalAirport?.icao ?? "???"
+        return "\(dep) → \(arr)"
+    }
 
+    // MARK: - Computed: Forecast
+
+    var forecastSeverity: TurbulenceSeverity {
+        forecast?.worstSeverity ?? .none
+    }
+
+    var forecastHorizonText: String {
+        guard let forecast else { return "" }
+        let hours = forecast.forecastHorizonHours
+        if hours >= 48 { return "\(hours / 24)-day forecast" }
+        return "\(hours)h forecast"
+    }
+
+    var forecastAdvice: (title: String, detail: String, icon: String, color: Color) {
+        switch forecastSeverity {
+        case .none:
+            return (
+                "Smooth Flight Expected",
+                "No significant turbulence is forecasted along your route. Enjoy your flight! Keep your seatbelt loosely fastened as a precaution.",
+                "checkmark.seal.fill",
+                .green
+            )
+        case .light:
+            return (
+                "Light Turbulence Possible",
+                "Minor bumps may occur on parts of your route. This is very common and not dangerous. Keep your seatbelt fastened when seated.",
+                "cloud.fill",
+                .yellow
+            )
+        case .moderate:
+            return (
+                "Moderate Turbulence Expected",
+                "Expect noticeable bumps along your route. Walking may be difficult at times. Keep your seatbelt fastened, secure loose items, and follow crew instructions.",
+                "cloud.bolt.fill",
+                .orange
+            )
+        case .severe, .extreme:
+            return (
+                "Significant Turbulence Forecasted",
+                "Strong turbulence is predicted on your route. Keep your seatbelt tightly fastened at all times, secure all loose items, and follow crew instructions carefully.",
+                "exclamationmark.triangle.fill",
+                .red
+            )
+        }
+    }
+
+    var dailyForecast: [(date: Date, worst: TurbulenceSeverity, count: Int)] {
+        forecast?.dailySummary() ?? []
+    }
+
+    var flightLevelBreakdown: [(level: Int, severity: TurbulenceSeverity, avgShear: Double, maxJet: Double)] {
+        guard let forecast else { return [] }
+        let allPoints = forecast.layers.flatMap(\.points)
+        let grouped = Dictionary(grouping: allPoints, by: \.flightLevel)
+        return grouped.map { level, points in
+            let worst = points.map(\.severity).max { $0.sortOrder < $1.sortOrder } ?? .none
+            let avgShear = points.map(\.windShear).reduce(0, +) / Double(max(points.count, 1))
+            let maxJet = points.map(\.jetStreamSpeed).max() ?? 0
+            return (level, worst, avgShear, maxJet)
+        }.sorted { $0.level > $1.level }
+    }
+
+    /// Aggregated forecast points for map — one per location, worst severity.
+    var forecastMapPoints: [TurbulenceForecastPoint] {
+        guard let forecast else { return [] }
+        let allPoints = forecast.layers.flatMap(\.points)
+        let grouped = Dictionary(grouping: allPoints) {
+            "\(Int($0.latitude * 10))_\(Int($0.longitude * 10))"
+        }
+        return grouped.compactMap { _, points in
+            points.max { $0.severity.sortOrder < $1.severity.sortOrder }
+        }
+    }
+
+    var pirepSummary: String {
+        guard !routePireps.isEmpty else { return "No recent pilot reports along this route" }
         let severe = routePireps.filter { $0.severity == .severe || $0.severity == .extreme }.count
         let moderate = routePireps.filter { $0.severity == .moderate }.count
         let light = routePireps.filter { $0.severity == .light }.count
-
         var parts: [String] = []
         if severe > 0 { parts.append("\(severe) severe") }
         if moderate > 0 { parts.append("\(moderate) moderate") }
         if light > 0 { parts.append("\(light) light") }
-
         return "\(routePireps.count) reports: \(parts.joined(separator: ", "))"
     }
 
@@ -78,7 +165,7 @@ class RouteViewModel: ObservableObject {
     // MARK: - Search
 
     func searchRoute() async {
-        // Resolve airports from text
+        // Resolve airports from text if needed
         if departureAirport == nil {
             departureAirport = Airport.findByQuery(departureText)
         }
@@ -100,36 +187,74 @@ class RouteViewModel: ObservableObject {
         departureSuggestions = []
         arrivalSuggestions = []
 
+        // Clear previous results
+        forecast = nil
+        routePireps = []
         isLoading = true
         errorMessage = nil
 
-        do {
-            let allPireps = try await weatherService.fetchPIREPs(hoursBack: 6)
-            routePireps = filterPirepsAlongRoute(pireps: allPireps, from: dep.coordinate, to: arr.coordinate)
+        // Fetch forecast and PIREPs concurrently
+        let forecastTask = Task {
+            try? await forecastService.fetchRouteForecast(
+                from: dep.coordinate, to: arr.coordinate, days: 3
+            )
+        }
+        let pirepsTask = Task {
+            (try? await weatherService.fetchPIREPs(hoursBack: 6)) ?? []
+        }
 
-            // Zoom to route
-            let midLat = (dep.coordinate.latitude + arr.coordinate.latitude) / 2
-            let midLon = (dep.coordinate.longitude + arr.coordinate.longitude) / 2
-            let latDelta = abs(dep.coordinate.latitude - arr.coordinate.latitude) * 1.4
-            let lonDelta = abs(dep.coordinate.longitude - arr.coordinate.longitude) * 1.4
+        forecast = await forecastTask.value
+        let allPireps = await pirepsTask.value
+        routePireps = filterPirepsAlongRoute(pireps: allPireps, from: dep.coordinate, to: arr.coordinate)
 
-            cameraPosition = .region(
-                MKCoordinateRegion(
-                    center: CLLocationCoordinate2D(latitude: midLat, longitude: midLon),
-                    span: MKCoordinateSpan(
-                        latitudeDelta: max(latDelta, 2),
-                        longitudeDelta: max(lonDelta, 2)
-                    )
+        // Zoom to route
+        let midLat = (dep.coordinate.latitude + arr.coordinate.latitude) / 2
+        let midLon = (dep.coordinate.longitude + arr.coordinate.longitude) / 2
+        let latDelta = abs(dep.coordinate.latitude - arr.coordinate.latitude) * 1.4
+        let lonDelta = abs(dep.coordinate.longitude - arr.coordinate.longitude) * 1.4
+
+        cameraPosition = .region(
+            MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: midLat, longitude: midLon),
+                span: MKCoordinateSpan(
+                    latitudeDelta: max(latDelta, 2),
+                    longitudeDelta: max(lonDelta, 2)
                 )
             )
+        )
 
+        if forecast == nil && routePireps.isEmpty {
+            errorMessage = "Unable to load forecast data. Check your connection and try again."
+        } else {
             showRoute = true
-        } catch {
-            errorMessage = error.localizedDescription
         }
 
         isLoading = false
     }
+
+    // MARK: - Clear
+
+    func clearRoute() {
+        departureText = ""
+        arrivalText = ""
+        departureAirport = nil
+        arrivalAirport = nil
+        routePireps = []
+        forecast = nil
+        showRoute = false
+        errorMessage = nil
+        departureSuggestions = []
+        arrivalSuggestions = []
+
+        cameraPosition = .userLocation(fallback: .region(
+            MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: 41.3851, longitude: 2.1734),
+                span: MKCoordinateSpan(latitudeDelta: 30, longitudeDelta: 30)
+            )
+        ))
+    }
+
+    // MARK: - Private
 
     private func filterPirepsAlongRoute(
         pireps: [PIREPReport],
@@ -173,24 +298,5 @@ class RouteViewModel: ObservableObject {
         let closest = CLLocation(latitude: closestLat, longitude: closestLon)
 
         return p.distance(from: closest)
-    }
-
-    func clearRoute() {
-        departureText = ""
-        arrivalText = ""
-        departureAirport = nil
-        arrivalAirport = nil
-        routePireps = []
-        showRoute = false
-        errorMessage = nil
-        departureSuggestions = []
-        arrivalSuggestions = []
-
-        cameraPosition = .userLocation(fallback: .region(
-            MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: 41.3851, longitude: 2.1734),
-                span: MKCoordinateSpan(latitudeDelta: 30, longitudeDelta: 30)
-            )
-        ))
     }
 }
