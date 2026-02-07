@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 import UIKit
 
 struct OnboardingView: View {
@@ -86,7 +87,7 @@ struct OnboardingView: View {
         .onChange(of: currentStep) { _ in
             resetAnimations()
             triggerAnimations()
-            if currentStep == 2 { startFanAnimation() }
+            if currentStep == 2 { startFanAnimation(); requestAppRating() }
             if currentStep == 3 { startLevelCarouselAnimation() }
             if currentStep == 4 { startReportCardsAnimation() }
             if currentStep == 5 { startQuadrantAnimations() }
@@ -1220,6 +1221,15 @@ struct OnboardingView: View {
         }
     }
 
+    // MARK: - App Rating
+
+    private func requestAppRating() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                SKStoreReviewController.requestReview(in: scene)
+            }
+        }
+    }
 }
 
 #Preview {

@@ -18,6 +18,9 @@ class RouteViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var showRoute = false
+    @Published var showNotificationPrompt = false
+    @Published var flightDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+    @Published var notificationScheduled = false
 
     // MARK: - Results
 
@@ -227,9 +230,45 @@ class RouteViewModel: ObservableObject {
             errorMessage = "Unable to load forecast data. Check your connection and try again."
         } else {
             showRoute = true
+            // Offer notification if not yet prompted for this search
+            if !notificationScheduled {
+                showNotificationPrompt = true
+            }
         }
 
         isLoading = false
+    }
+
+    // MARK: - Notifications
+
+    func scheduleFlightNotification() {
+        guard let dep = departureAirport, let arr = arrivalAirport else { return }
+        let severity = forecastSeverity.displayName
+
+        Task {
+            let service = NotificationService.shared
+            if !service.isAuthorized {
+                let granted = await service.requestPermission()
+                guard granted else {
+                    showNotificationPrompt = false
+                    return
+                }
+                UserDefaults.standard.set(true, forKey: "notificationsEnabled")
+            }
+
+            service.scheduleFlightReminder(
+                departureICAO: dep.icao,
+                arrivalICAO: arr.icao,
+                flightDate: flightDate,
+                severity: severity
+            )
+            notificationScheduled = true
+            showNotificationPrompt = false
+        }
+    }
+
+    func dismissNotificationPrompt() {
+        showNotificationPrompt = false
     }
 
     // MARK: - Clear
@@ -245,6 +284,9 @@ class RouteViewModel: ObservableObject {
         errorMessage = nil
         departureSuggestions = []
         arrivalSuggestions = []
+        showNotificationPrompt = false
+        notificationScheduled = false
+        flightDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
 
         cameraPosition = .userLocation(fallback: .region(
             MKCoordinateRegion(

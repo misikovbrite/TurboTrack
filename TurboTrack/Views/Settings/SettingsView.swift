@@ -4,10 +4,48 @@ struct SettingsView: View {
     @AppStorage("useMetricAltitude") private var useMetricAltitude = false
     @AppStorage("autoRefreshEnabled") private var autoRefreshEnabled = true
     @AppStorage("refreshIntervalMinutes") private var refreshIntervalMinutes = 5
+    @AppStorage("notificationsEnabled") private var notificationsEnabled = false
+    @AppStorage("notifyHoursBefore") private var notifyHoursBefore = 24
+
+    @StateObject private var notificationService = NotificationService.shared
+    @State private var pendingCount = 0
 
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    Toggle("Flight Reminders", isOn: $notificationsEnabled)
+                        .onChange(of: notificationsEnabled) { enabled in
+                            if enabled {
+                                Task {
+                                    let granted = await notificationService.requestPermission()
+                                    if !granted { notificationsEnabled = false }
+                                }
+                            } else {
+                                notificationService.removeAllReminders()
+                            }
+                        }
+
+                    if notificationsEnabled {
+                        Picker("Remind me", selection: $notifyHoursBefore) {
+                            Text("12 hours before").tag(12)
+                            Text("24 hours before").tag(24)
+                            Text("48 hours before").tag(48)
+                        }
+
+                        HStack {
+                            Text("Scheduled reminders")
+                            Spacer()
+                            Text("\(pendingCount)")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                } header: {
+                    Text("Notifications")
+                } footer: {
+                    Text("Get a turbulence update before your flight with the latest forecast for your route.")
+                }
+
                 Section("Units") {
                     Picker("Altitude Units", selection: $useMetricAltitude) {
                         Text("Feet (ft)").tag(false)
@@ -89,6 +127,9 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .task {
+                pendingCount = await notificationService.pendingCount()
+            }
         }
     }
 }

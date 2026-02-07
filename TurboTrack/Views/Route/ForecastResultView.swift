@@ -20,6 +20,13 @@ struct ForecastResultView: View {
                 }
 
                 pirepSection
+
+                if viewModel.showNotificationPrompt {
+                    notificationPromptCard
+                } else if viewModel.notificationScheduled {
+                    notificationConfirmCard
+                }
+
                 disclaimerText
             }
             .padding()
@@ -206,6 +213,82 @@ struct ForecastResultView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    // MARK: - Notification Prompt
+
+    private var notificationPromptCard: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: "bell.badge.fill")
+                    .font(.title2)
+                    .foregroundColor(.blue)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Get a reminder before your flight?")
+                        .font(.subheadline.bold())
+                    Text("We'll send you an updated forecast")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+            }
+
+            DatePicker(
+                "Flight date",
+                selection: $viewModel.flightDate,
+                in: Date()...,
+                displayedComponents: [.date, .hourAndMinute]
+            )
+            .font(.subheadline)
+
+            HStack(spacing: 12) {
+                Button {
+                    viewModel.dismissNotificationPrompt()
+                } label: {
+                    Text("No Thanks")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+
+                Button {
+                    viewModel.scheduleFlightNotification()
+                } label: {
+                    Text("Remind Me")
+                        .font(.subheadline.bold())
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.blue)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+            }
+        }
+        .padding(16)
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private var notificationConfirmCard: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title3)
+                .foregroundColor(.green)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Reminder set!")
+                    .font(.subheadline.bold())
+                Text("You'll get an updated forecast before your flight")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+        }
         .padding(16)
         .background(.background)
         .clipShape(RoundedRectangle(cornerRadius: 14))

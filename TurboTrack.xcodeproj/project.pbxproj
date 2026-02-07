@@ -25,6 +25,7 @@
 		B152CC978546977ABA0EA8BE /* TurbulenceForecastService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728B0775B31A521708945A34 /* TurbulenceForecastService.swift */; };
 		C01CD095A42F05FC24B4EA1F /* TurboTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD2B32B06534B2E43C16002 /* TurboTrackApp.swift */; };
 		C07ED9F25880B4298432E457 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B83C475F6AD1C00E406CDD9 /* OnboardingView.swift */; };
+		C6E114AA8741D9D37310E3F8 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE2166D2A638F9552565CD5 /* NotificationService.swift */; };
 		D30FF6535A223767542E6347 /* SIGMET.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C297DA0115E80AC915056C3 /* SIGMET.swift */; };
 		D6826B0F0C70A512B50D94DD /* ReportsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4131B99E42E3FC815AEFFB61 /* ReportsViewModel.swift */; };
 		D75104FA8FE0CCD5A2051249 /* TurbulenceSeverity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE333455BE4B6308EE3EB6C /* TurbulenceSeverity.swift */; };
@@ -36,6 +37,7 @@
 
 /* Begin PBXFileReference section */
 		0DE721B19AFB03674B844D6B /* RouteMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteMapView.swift; sourceTree = "<group>"; };
+		1BE2166D2A638F9552565CD5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		29F42E136D7C5FD5BEE9306F /* ForecastResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastResultView.swift; sourceTree = "<group>"; };
 		2C297DA0115E80AC915056C3 /* SIGMET.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIGMET.swift; sourceTree = "<group>"; };
 		2FB951EF1CE817567DAAB06F /* ReportsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsListView.swift; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 			children = (
 				8938E198455778F352AEB870 /* AviationWeatherService.swift */,
 				7C03973F87619A762AC8471D /* LocationService.swift */,
+				1BE2166D2A638F9552565CD5 /* NotificationService.swift */,
 				728B0775B31A521708945A34 /* TurbulenceForecastService.swift */,
 			);
 			path = Services;
@@ -270,6 +273,7 @@
 				F82157396D6C9489173D69F5 /* ForecastResultView.swift in Sources */,
 				0CB22EBBF0389AC26E28998E /* LocationService.swift in Sources */,
 				FDAE3EA0A104A9207053578C /* MapViewModel.swift in Sources */,
+				C6E114AA8741D9D37310E3F8 /* NotificationService.swift in Sources */,
 				C07ED9F25880B4298432E457 /* OnboardingView.swift in Sources */,
 				79EDB0C7559C062CBBCFC69D /* PIREPReport.swift in Sources */,
 				687E008666F45988ACE7346D /* ReportDetailSheet.swift in Sources */,
