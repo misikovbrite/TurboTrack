@@ -9,10 +9,15 @@
 /* Begin PBXBuildFile section */
 		0CB22EBBF0389AC26E28998E /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C03973F87619A762AC8471D /* LocationService.swift */; };
 		1C9B4162ECA9478DFEA31C91 /* TurbulenceAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FCEAF7D6146EFB7F873758 /* TurbulenceAnnotation.swift */; };
+		23C8173CBA924399B88C5FC0 /* PremiumBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ABA56294901E78BA3909FC1 /* PremiumBannerView.swift */; };
+		2B089018EFA70EAA37ED9AEE /* TurbulenceFAQView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58509CAE00C9DC03C291BE79 /* TurbulenceFAQView.swift */; };
 		2B87C3F6613676CABAD6D4FD /* Airport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0F924FEDFA69E88BDD8CF6 /* Airport.swift */; };
 		2FE4DECBA9E45EBF255BDC79 /* ReportsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB951EF1CE817567DAAB06F /* ReportsListView.swift */; };
+		31EBEE40B288191FBF4C5C9A /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 004474AA4C903889ACC1BB1B /* FirebaseAnalytics */; };
 		3427435FC5D2CF3961CB02C2 /* RouteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183705284B199B3333CCCA5 /* RouteViewModel.swift */; };
 		35667FBF2A1F825052052993 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B30AA180F2B9AADC111FF3 /* SettingsView.swift */; };
+		40BE18D676BC985B31DE2248 /* Configuration.storekit in Resources */ = {isa = PBXBuildFile; fileRef = F0E6CD2919FD0C54FDA0A510 /* Configuration.storekit */; };
+		41C4A59D55179A335465997D /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = BC8E5E48DF08479DD74C8FE8 /* FirebaseRemoteConfig */; };
 		4FE8BA19EBBB6704DE4AB253 /* AviationWeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8938E198455778F352AEB870 /* AviationWeatherService.swift */; };
 		57964A2FB261FC5C4436B212 /* TurbulenceForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D572F56CA86D87DCFEE5D91D /* TurbulenceForecast.swift */; };
 		580A521EC959D58AFF603A50 /* ReportRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F485C92FF2C1E00FAF4625 /* ReportRow.swift */; };
@@ -20,18 +25,23 @@
 		687E008666F45988ACE7346D /* ReportDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FEFF479AA4B48A46DA2689E /* ReportDetailSheet.swift */; };
 		6A6522AF99ECE7EE8DFBD764 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96173FB47B38F365494CADE8 /* Extensions.swift */; };
 		79EDB0C7559C062CBBCFC69D /* PIREPReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FA00FE4BCAFDEBE0C74E79 /* PIREPReport.swift */; };
+		7F48DC289BC5260FD5F73CED /* ForecastHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC3AB0A18B57CF3CDFD7402 /* ForecastHistory.swift */; };
 		82F5CCD6341473D87411A1DF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2020F40F0821736B02E8C82 /* ContentView.swift */; };
+		87893D84979D0EA92C3C7F62 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1588CCE723771CABEF929EE /* PaywallView.swift */; };
 		8E4AB2CC7EECFC9402B1CCA0 /* TurbulenceMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8738781F71A4C7CF891ABA39 /* TurbulenceMapView.swift */; };
+		AA1B2C3D4E5F6A7B8C9D0E1F /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BB2C3D4E5F6A7B8C9D0E1F2A /* Localizable.xcstrings */; };
 		B152CC978546977ABA0EA8BE /* TurbulenceForecastService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728B0775B31A521708945A34 /* TurbulenceForecastService.swift */; };
 		C01CD095A42F05FC24B4EA1F /* TurboTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD2B32B06534B2E43C16002 /* TurboTrackApp.swift */; };
 		C07ED9F25880B4298432E457 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B83C475F6AD1C00E406CDD9 /* OnboardingView.swift */; };
 		C6E114AA8741D9D37310E3F8 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE2166D2A638F9552565CD5 /* NotificationService.swift */; };
+		D0BEDFA5F9BD9EFC6F89D1EA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4EF1F0935AB3610BE7C3E522 /* GoogleService-Info.plist */; };
 		D30FF6535A223767542E6347 /* SIGMET.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C297DA0115E80AC915056C3 /* SIGMET.swift */; };
 		D6826B0F0C70A512B50D94DD /* ReportsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4131B99E42E3FC815AEFFB61 /* ReportsViewModel.swift */; };
 		D75104FA8FE0CCD5A2051249 /* TurbulenceSeverity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FE333455BE4B6308EE3EB6C /* TurbulenceSeverity.swift */; };
 		E0873CB7D396F584711A304D /* RouteInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA2CDBDB70BECA0BA7DBD09A /* RouteInputView.swift */; };
 		EF948A0E7FA3C191B12A9E0B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 78A01F92572C9AE0FBABC6EE /* Assets.xcassets */; };
 		F82157396D6C9489173D69F5 /* ForecastResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29F42E136D7C5FD5BEE9306F /* ForecastResultView.swift */; };
+		FCE0FA6F1BEBFEB648D71281 /* SubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CFFBDF2E2B446D61A9A384 /* SubscriptionService.swift */; };
 		FDAE3EA0A104A9207053578C /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 576EF129971C2F95AA1D2EC0 /* MapViewModel.swift */; };
 /* End PBXBuildFile section */
 
@@ -44,7 +54,11 @@
 		3FEFF479AA4B48A46DA2689E /* ReportDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportDetailSheet.swift; sourceTree = "<group>"; };
 		4131B99E42E3FC815AEFFB61 /* ReportsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsViewModel.swift; sourceTree = "<group>"; };
 		4B83C475F6AD1C00E406CDD9 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		4EF1F0935AB3610BE7C3E522 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		4FC3AB0A18B57CF3CDFD7402 /* ForecastHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastHistory.swift; sourceTree = "<group>"; };
+		51CFFBDF2E2B446D61A9A384 /* SubscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionService.swift; sourceTree = "<group>"; };
 		576EF129971C2F95AA1D2EC0 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
+		58509CAE00C9DC03C291BE79 /* TurbulenceFAQView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurbulenceFAQView.swift; sourceTree = "<group>"; };
 		6183705284B199B3333CCCA5 /* RouteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteViewModel.swift; sourceTree = "<group>"; };
 		63F485C92FF2C1E00FAF4625 /* ReportRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportRow.swift; sourceTree = "<group>"; };
 		69B30AA180F2B9AADC111FF3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -57,13 +71,29 @@
 		8738781F71A4C7CF891ABA39 /* TurbulenceMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurbulenceMapView.swift; sourceTree = "<group>"; };
 		8938E198455778F352AEB870 /* AviationWeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AviationWeatherService.swift; sourceTree = "<group>"; };
 		96173FB47B38F365494CADE8 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		9ABA56294901E78BA3909FC1 /* PremiumBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumBannerView.swift; sourceTree = "<group>"; };
+		A1588CCE723771CABEF929EE /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		BB2C3D4E5F6A7B8C9D0E1F2A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		BF9410CAC0528E469B9031EE /* Turbulence Forecast.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Turbulence Forecast.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2FA00FE4BCAFDEBE0C74E79 /* PIREPReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PIREPReport.swift; sourceTree = "<group>"; };
 		D572F56CA86D87DCFEE5D91D /* TurbulenceForecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurbulenceForecast.swift; sourceTree = "<group>"; };
 		DA2CDBDB70BECA0BA7DBD09A /* RouteInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteInputView.swift; sourceTree = "<group>"; };
 		E4FCEAF7D6146EFB7F873758 /* TurbulenceAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurbulenceAnnotation.swift; sourceTree = "<group>"; };
+		F0E6CD2919FD0C54FDA0A510 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 		F2020F40F0821736B02E8C82 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		71ABB54D8C608F7897BFBC44 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				31EBEE40B288191FBF4C5C9A /* FirebaseAnalytics in Frameworks */,
+				41C4A59D55179A335465997D /* FirebaseRemoteConfig in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		0148F420EFAB5135ECB080F0 /* ViewModels */ = {
@@ -97,6 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				6F0F924FEDFA69E88BDD8CF6 /* Airport.swift */,
+				4FC3AB0A18B57CF3CDFD7402 /* ForecastHistory.swift */,
 				C2FA00FE4BCAFDEBE0C74E79 /* PIREPReport.swift */,
 				2C297DA0115E80AC915056C3 /* SIGMET.swift */,
 				D572F56CA86D87DCFEE5D91D /* TurbulenceForecast.swift */,
@@ -108,11 +139,13 @@
 			isa = PBXGroup;
 			children = (
 				F2020F40F0821736B02E8C82 /* ContentView.swift */,
+				C14E2853DA33A4936EA16E8C /* Education */,
 				427B433527EC7B6F265B3D90 /* Map */,
 				E3D78867CFF4EC16F03A34C8 /* Onboarding */,
 				039A567D291673AD99606CC1 /* Reports */,
 				5206D0C458E67CC326013F31 /* Route */,
 				F71FCE5C0040C17F97E8A27C /* Settings */,
+				695D73FE9A0C19B92720D2EE /* Shared */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -145,6 +178,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		695D73FE9A0C19B92720D2EE /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				9ABA56294901E78BA3909FC1 /* PremiumBannerView.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		7BCB8F971D3F79FA9638F243 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -154,12 +195,21 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		C14E2853DA33A4936EA16E8C /* Education */ = {
+			isa = PBXGroup;
+			children = (
+				58509CAE00C9DC03C291BE79 /* TurbulenceFAQView.swift */,
+			);
+			path = Education;
+			sourceTree = "<group>";
+		};
 		D83A427C39A09C52128026BE /* Services */ = {
 			isa = PBXGroup;
 			children = (
 				8938E198455778F352AEB870 /* AviationWeatherService.swift */,
 				7C03973F87619A762AC8471D /* LocationService.swift */,
 				1BE2166D2A638F9552565CD5 /* NotificationService.swift */,
+				51CFFBDF2E2B446D61A9A384 /* SubscriptionService.swift */,
 				728B0775B31A521708945A34 /* TurbulenceForecastService.swift */,
 			);
 			path = Services;
@@ -169,6 +219,9 @@
 			isa = PBXGroup;
 			children = (
 				78A01F92572C9AE0FBABC6EE /* Assets.xcassets */,
+				F0E6CD2919FD0C54FDA0A510 /* Configuration.storekit */,
+				4EF1F0935AB3610BE7C3E522 /* GoogleService-Info.plist */,
+				BB2C3D4E5F6A7B8C9D0E1F2A /* Localizable.xcstrings */,
 				6BD2B32B06534B2E43C16002 /* TurboTrackApp.swift */,
 				21EDED524C82FA22B04AA0EC /* Models */,
 				D83A427C39A09C52128026BE /* Services */,
@@ -183,6 +236,7 @@
 			isa = PBXGroup;
 			children = (
 				4B83C475F6AD1C00E406CDD9 /* OnboardingView.swift */,
+				A1588CCE723771CABEF929EE /* PaywallView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -204,6 +258,7 @@
 			buildPhases = (
 				38EBA15F2B78526DEA5D5183 /* Sources */,
 				333E8A3276D27DC9EEF23056 /* Resources */,
+				71ABB54D8C608F7897BFBC44 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -211,6 +266,8 @@
 			);
 			name = TurboTrack;
 			packageProductDependencies = (
+				004474AA4C903889ACC1BB1B /* FirebaseAnalytics */,
+				BC8E5E48DF08479DD74C8FE8 /* FirebaseRemoteConfig */,
 			);
 			productName = TurboTrack;
 			productReference = BF9410CAC0528E469B9031EE /* Turbulence Forecast.app */;
@@ -223,7 +280,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					90878DAC27F0BCA325F7AFC5 = {
 						ProvisioningStyle = Automatic;
@@ -237,9 +294,20 @@
 			knownRegions = (
 				Base,
 				en,
+				ru,
+				de,
+				fr,
+				es,
+				"pt-BR",
+				sv,
+				nb,
+				da,
 			);
 			mainGroup = 1547387005725FC33C961FBA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EEE90053B52D813C064D8576 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -254,6 +322,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				EF948A0E7FA3C191B12A9E0B /* Assets.xcassets in Resources */,
+				40BE18D676BC985B31DE2248 /* Configuration.storekit in Resources */,
+				D0BEDFA5F9BD9EFC6F89D1EA /* GoogleService-Info.plist in Resources */,
+				AA1B2C3D4E5F6A7B8C9D0E1F /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,12 +339,15 @@
 				4FE8BA19EBBB6704DE4AB253 /* AviationWeatherService.swift in Sources */,
 				82F5CCD6341473D87411A1DF /* ContentView.swift in Sources */,
 				6A6522AF99ECE7EE8DFBD764 /* Extensions.swift in Sources */,
+				7F48DC289BC5260FD5F73CED /* ForecastHistory.swift in Sources */,
 				F82157396D6C9489173D69F5 /* ForecastResultView.swift in Sources */,
 				0CB22EBBF0389AC26E28998E /* LocationService.swift in Sources */,
 				FDAE3EA0A104A9207053578C /* MapViewModel.swift in Sources */,
 				C6E114AA8741D9D37310E3F8 /* NotificationService.swift in Sources */,
 				C07ED9F25880B4298432E457 /* OnboardingView.swift in Sources */,
 				79EDB0C7559C062CBBCFC69D /* PIREPReport.swift in Sources */,
+				87893D84979D0EA92C3C7F62 /* PaywallView.swift in Sources */,
+				23C8173CBA924399B88C5FC0 /* PremiumBannerView.swift in Sources */,
 				687E008666F45988ACE7346D /* ReportDetailSheet.swift in Sources */,
 				580A521EC959D58AFF603A50 /* ReportRow.swift in Sources */,
 				2FE4DECBA9E45EBF255BDC79 /* ReportsListView.swift in Sources */,
@@ -283,8 +357,10 @@
 				3427435FC5D2CF3961CB02C2 /* RouteViewModel.swift in Sources */,
 				D30FF6535A223767542E6347 /* SIGMET.swift in Sources */,
 				35667FBF2A1F825052052993 /* SettingsView.swift in Sources */,
+				FCE0FA6F1BEBFEB648D71281 /* SubscriptionService.swift in Sources */,
 				C01CD095A42F05FC24B4EA1F /* TurboTrackApp.swift in Sources */,
 				1C9B4162ECA9478DFEA31C91 /* TurbulenceAnnotation.swift in Sources */,
+				2B089018EFA70EAA37ED9AEE /* TurbulenceFAQView.swift in Sources */,
 				57964A2FB261FC5C4436B212 /* TurbulenceForecast.swift in Sources */,
 				B152CC978546977ABA0EA8BE /* TurbulenceForecastService.swift in Sources */,
 				8E4AB2CC7EECFC9402B1CCA0 /* TurbulenceMapView.swift in Sources */,
@@ -328,8 +404,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = HQ59Y7A4T2;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -347,6 +426,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.2.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -354,7 +434,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.9;
 			};
 			name = Debug;
 		};
@@ -364,8 +444,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5487HDH2B9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Turbulence Forecast";
@@ -380,11 +458,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.turbulenceforecastapp;
 				PRODUCT_NAME = "Turbulence Forecast";
 				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.9;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -422,8 +498,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = HQ59Y7A4T2;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -435,13 +514,14 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.2.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 5.9;
 			};
 			name = Release;
 		};
@@ -451,8 +531,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5487HDH2B9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Turbulence Forecast";
@@ -467,11 +545,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.turbulenceforecastapp;
 				PRODUCT_NAME = "Turbulence Forecast";
 				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.9;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -498,6 +574,30 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EEE90053B52D813C064D8576 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = exactVersion;
+				version = 11.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		004474AA4C903889ACC1BB1B /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEE90053B52D813C064D8576 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		BC8E5E48DF08479DD74C8FE8 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEE90053B52D813C064D8576 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1FD564DA24DA2A37D3D8B1BF /* Project object */;
 }

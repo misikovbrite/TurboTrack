@@ -7,12 +7,46 @@ struct SettingsView: View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled = false
     @AppStorage("notifyHoursBefore") private var notifyHoursBefore = 24
 
+    @EnvironmentObject var subscriptionService: SubscriptionService
     @StateObject private var notificationService = NotificationService.shared
     @State private var pendingCount = 0
+    @State private var showPaywall = false
+    @State private var showFAQ = false
 
     var body: some View {
         NavigationStack {
             List {
+                // Subscription section
+                Section {
+                    if subscriptionService.isPro {
+                        HStack {
+                            Label("Premium Active", systemImage: "checkmark.seal.fill")
+                                .foregroundColor(.green)
+                            Spacer()
+                        }
+                        Button {
+                            subscriptionService.manageSubscriptions()
+                        } label: {
+                            Label("Manage Subscription", systemImage: "creditcard")
+                        }
+                    } else {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            HStack {
+                                Label("Upgrade to Premium", systemImage: "star.fill")
+                                    .foregroundColor(.blue)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Subscription")
+                }
+
                 Section {
                     Toggle("Flight Reminders", isOn: $notificationsEnabled)
                         .onChange(of: notificationsEnabled) { enabled in
@@ -66,6 +100,20 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Learn") {
+                    Button {
+                        showFAQ = true
+                    } label: {
+                        HStack {
+                            Label("Turbulence Guide", systemImage: "book.fill")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
                 Section("Data Sources") {
                     Link(destination: URL(string: "https://aviationweather.gov")!) {
                         HStack {
@@ -115,6 +163,16 @@ struct SettingsView: View {
                     }
                 }
 
+                #if DEBUG
+                Section("Debug") {
+                    Button(role: .destructive) {
+                        UserDefaults.standard.set(false, forKey: "onboarding_completed")
+                    } label: {
+                        Label("Restart Onboarding", systemImage: "arrow.counterclockwise")
+                    }
+                }
+                #endif
+
                 Section("About") {
                     HStack {
                         Text("Version")
@@ -144,6 +202,16 @@ struct SettingsView: View {
             .task {
                 pendingCount = await notificationService.pendingCount()
             }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView(source: "settings") {
+                    showPaywall = false
+                }
+                .environmentObject(subscriptionService)
+            }
+            .sheet(isPresented: $showFAQ) {
+                TurbulenceFAQView()
+                    .presentationDetents([.large])
+            }
         }
     }
     private func openMail() {
@@ -158,4 +226,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
+        .environmentObject(SubscriptionService())
 }

@@ -6,11 +6,11 @@ struct OnboardingView: View {
     var onComplete: () -> Void
 
     @State private var currentStep = 0
-    @State private var quizAnswer1: String?
-    @State private var quizAnswer2: String?
-    @State private var quizAnswer3: String?
-    @State private var selectedInterests: Set<String> = []
-    @State private var quizAnswer5: String?
+    @State private var quizAnxiety: String?
+    @State private var quizWorstFear: String?
+    @State private var quizImpact: String?
+    @State private var selectedHelpers: Set<String> = []
+    @State private var quizNextFlight: String?
 
     // Animation states
     @State private var iconScale: CGFloat = 0.5
@@ -27,11 +27,10 @@ struct OnboardingView: View {
     @State private var pulseScale: CGFloat = 1.0
 
     // Feature-specific states
-    @State private var fanCardsVisible: [Bool] = [false, false, false, false, false]
-    @State private var levelCardsRow1Offset: CGFloat = 0
-    @State private var levelCardsRow2Offset: CGFloat = 0
-    @State private var reportCardsVisible: [Bool] = [false, false, false]
-    @State private var quadrantVisible: [Bool] = [false, false, false, false]
+    @State private var planeOffset: CGFloat = 0
+    @State private var calendarCellsVisible: [Bool] = Array(repeating: false, count: 14)
+    @State private var routeDrawProgress: CGFloat = 0
+    @State private var mapLegendOpacity: Double = 0
 
     // Setup screen states
     @State private var setupProgress: CGFloat = 0
@@ -39,7 +38,7 @@ struct OnboardingView: View {
     @State private var currentSetupStepIndex: Int = -1
     @State private var showSetupStats = false
 
-    private let totalSteps = 13 // 0-12
+    private let totalSteps = 10 // 0-9, step 9 = dark setup → onComplete → paywall
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     private var isIPad: Bool { horizontalSizeClass == .regular }
@@ -50,7 +49,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            if currentStep != 11 {
+            if currentStep != 9 {
                 ZStack {
                     LinearGradient(
                         colors: [
@@ -69,18 +68,15 @@ struct OnboardingView: View {
             Group {
                 switch currentStep {
                 case 0: welcomeScreen
-                case 1: feature1Screen
-                case 2: forecastFanScreen
-                case 3: feature3Screen
-                case 4: feature4Screen
-                case 5: dataQuadrantsScreen
-                case 6: quiz1Screen
-                case 7: quiz2Screen
-                case 8: quiz3Screen
-                case 9: quiz4Screen
-                case 10: quiz5Screen
-                case 11: darkSetupScreen
-                case 12: completionScreen
+                case 1: featureKnowScreen
+                case 2: featurePlanScreen
+                case 3: featureUnderstandScreen
+                case 4: quizAnxietyScreen
+                case 5: quizWorstFearScreen
+                case 6: quizImpactScreen
+                case 7: quizHelpScreen
+                case 8: quizNextFlightScreen
+                case 9: darkSetupScreen
                 default: EmptyView()
                 }
             }
@@ -90,11 +86,10 @@ struct OnboardingView: View {
         .onChange(of: currentStep) { _ in
             resetAnimations()
             triggerAnimations()
-            if currentStep == 2 { startFanAnimation(); requestAppRating() }
-            if currentStep == 3 { startLevelCarouselAnimation() }
-            if currentStep == 4 { startReportCardsAnimation() }
-            if currentStep == 5 { startQuadrantAnimations() }
-            if currentStep == 11 { startSetupAnimation() }
+            if currentStep == 1 { startFlightCardAnimation() }
+            if currentStep == 2 { startCalendarAnimation(); requestAppRating() }
+            if currentStep == 3 { startMapAnimation() }
+            if currentStep == 9 { startSetupAnimation() }
         }
         .onAppear {
             triggerAnimations()
@@ -111,11 +106,10 @@ struct OnboardingView: View {
         subtitleOpacity = 0
         cardsOpacity = 0
         cardOffsets = [30, 30, 30, 30]
-        fanCardsVisible = [false, false, false, false, false]
-        levelCardsRow1Offset = 0
-        levelCardsRow2Offset = 0
-        reportCardsVisible = [false, false, false]
-        quadrantVisible = [false, false, false, false]
+        planeOffset = 0
+        calendarCellsVisible = Array(repeating: false, count: 14)
+        routeDrawProgress = 0
+        mapLegendOpacity = 0
         currentSetupStepIndex = -1
     }
 
@@ -182,46 +176,38 @@ struct OnboardingView: View {
     private var welcomeScreen: some View {
         onboardingPage {
             VStack(spacing: 0) {
-                Spacer(minLength: 20)
+                Spacer()
 
-                ZStack {
-                    RoundedRectangle(cornerRadius: 36, style: .continuous)
-                        .fill(accent.opacity(0.2))
-                        .frame(width: 160, height: 160)
-                        .blur(radius: 20)
-                        .scaleEffect(pulseScale)
+                Image("onboarding_welcome")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 220, height: 280)
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .shadow(color: accent.opacity(0.3), radius: 24, x: 0, y: 12)
+                    .scaleEffect(iconScale)
+                    .opacity(iconOpacity)
 
-                    Image("AppLogo")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 140, height: 140)
-                        .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-                        .shadow(color: accent.opacity(0.4), radius: 24, x: 0, y: 12)
-                }
-                .scaleEffect(iconScale)
-                .opacity(iconOpacity)
-
-                Spacer().frame(height: 32)
+                Spacer().frame(height: 28)
 
                 VStack(spacing: 4) {
-                    Text("Turbulence")
-                        .font(.system(size: 36, weight: .heavy))
-                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    Text("Forecast")
+                    Text("Fly Calm")
                         .font(.system(size: 36, weight: .heavy))
                         .foregroundColor(accent)
+                    Text("Every Time")
+                        .font(.system(size: 36, weight: .heavy))
+                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                 }
                 .opacity(titleOpacity)
 
                 Spacer().frame(height: 12)
 
-                Text("Know what to expect\nbefore you fly")
+                Text("Know what turbulence to expect\nbefore you board")
                     .font(.system(size: 17))
                     .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.5))
                     .multilineTextAlignment(.center)
                     .opacity(subtitleOpacity)
 
-                Spacer(minLength: 24)
+                Spacer().frame(height: 32)
 
                 continueButton { withAnimation { currentStep = 1 } }
                     .padding(.bottom, 50)
@@ -230,53 +216,24 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Step 1: Feature — Check Any Route
+    // MARK: - Step 1: Know Before You Fly
 
-    private var feature1Screen: some View {
+    private var featureKnowScreen: some View {
         onboardingPage {
             VStack(spacing: 0) {
-                Spacer(minLength: 20)
+                Spacer()
 
-                // Route demo card
-                VStack(spacing: 16) {
-                    HStack(spacing: 10) {
-                        VStack(spacing: 6) {
-                            Circle().fill(.green).frame(width: 10, height: 10)
-                            Rectangle().fill(.secondary.opacity(0.3)).frame(width: 2, height: 24)
-                            Circle().fill(.red).frame(width: 10, height: 10)
-                        }
-                        VStack(spacing: 8) {
-                            routeDemoField("New York (KJFK)")
-                            routeDemoField("London (EGLL)")
-                        }
-                    }
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(accent)
-                        .frame(height: 48)
-                        .overlay(
-                            HStack(spacing: 8) {
-                                Image(systemName: "paperplane.fill")
-                                Text("Check Turbulence")
-                                    .fontWeight(.semibold)
-                            }
-                            .foregroundColor(.white)
-                        )
-                }
-                .padding(20)
-                .background(Color.white)
-                .cornerRadius(20)
-                .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
-                .padding(.horizontal, 32)
-                .scaleEffect(iconScale)
-                .opacity(iconOpacity)
+                flightCardWidget
+                    .scaleEffect(iconScale)
+                    .opacity(iconOpacity)
 
-                Spacer().frame(height: 32)
+                Spacer().frame(height: 24)
 
                 VStack(spacing: 4) {
-                    Text("Check")
+                    Text("Know Before")
                         .font(.system(size: 36, weight: .heavy))
                         .foregroundColor(accent)
-                    Text("Any Route")
+                    Text("You Fly")
                         .font(.system(size: 36, weight: .heavy))
                         .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                 }
@@ -284,14 +241,14 @@ struct OnboardingView: View {
 
                 Spacer().frame(height: 12)
 
-                Text("Enter departure and arrival to get\na detailed turbulence forecast")
+                Text("Enter your flight and see exactly\nwhen and where to expect bumps")
                     .font(.system(size: 17))
                     .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.5))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .opacity(subtitleOpacity)
 
-                Spacer(minLength: 24)
+                Spacer().frame(height: 32)
 
                 continueButton { withAnimation { currentStep = 2 } }
                     .padding(.bottom, 50)
@@ -300,71 +257,136 @@ struct OnboardingView: View {
         }
     }
 
-    private func routeDemoField(_ text: String) -> some View {
-        HStack {
-            Text(text)
-                .font(.subheadline)
-                .foregroundColor(.primary)
-            Spacer()
+    // MARK: - Flight Card Widget
+
+    private var flightCardWidget: some View {
+        VStack(spacing: 14) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 5) {
+                        Circle().fill(Color.green).frame(width: 8, height: 8)
+                        Text("JFK").font(.system(size: 11, weight: .bold)).foregroundColor(.secondary)
+                    }
+                    Text("New York")
+                        .font(.system(size: 20, weight: .heavy))
+                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    HStack(spacing: 5) {
+                        Text("LHR").font(.system(size: 11, weight: .bold)).foregroundColor(.secondary)
+                        Circle().fill(Color.red).frame(width: 8, height: 8)
+                    }
+                    Text("London")
+                        .font(.system(size: 20, weight: .heavy))
+                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                }
+            }
+
+            GeometryReader { geo in
+                let w = geo.size.width
+                let t = planeOffset
+                let curveY: CGFloat = 20 * (1 - 3 * t + 3 * t * t)
+
+                Path { p in
+                    p.move(to: CGPoint(x: 0, y: 20))
+                    p.addQuadCurve(to: CGPoint(x: w, y: 20), control: CGPoint(x: w / 2, y: -10))
+                }
+                .stroke(style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
+                .foregroundColor(Color.gray.opacity(0.25))
+
+                Image(systemName: "airplane")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(accent)
+                    .position(x: max(1, w * t), y: curveY)
+                    .opacity(t > 0 ? 1 : 0)
+            }
+            .frame(height: 40)
+
+            HStack(spacing: 6) {
+                Circle().fill(Color(red: 0.80, green: 0.68, blue: 0.0)).frame(width: 8, height: 8)
+                Text("Light Turbulence")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Color(red: 0.4, green: 0.35, blue: 0.05))
+            }
+            .padding(.horizontal, 16).padding(.vertical, 10)
+            .background(Color(red: 0.80, green: 0.68, blue: 0.0).opacity(0.12))
+            .cornerRadius(20)
+
+            HStack {
+                Label("7h 20m", systemImage: "clock")
+                    .font(.system(size: 12, weight: .medium)).foregroundColor(.secondary)
+                Spacer()
+                Label("Feb 18", systemImage: "calendar")
+                    .font(.system(size: 12, weight: .medium)).foregroundColor(.secondary)
+            }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(Color(.tertiarySystemFill))
-        .cornerRadius(10)
+        .padding(22)
+        .background(Color.white)
+        .cornerRadius(24)
+        .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 10)
+        .padding(.horizontal, 16)
     }
 
-    // MARK: - Step 2: Forecast Fan (3-day cards)
+    private func startFlightCardAnimation() {
+        planeOffset = 0
+        withAnimation(.easeInOut(duration: 2.0).delay(0.5)) {
+            planeOffset = 1.0
+        }
+    }
 
-    private let fanSeverities: [(label: String, severity: String, color: Color)] = [
-        ("Mon", "Smooth", Color.green),
-        ("Tue", "Light", Color.yellow),
-        ("Wed", "Moderate", Color.orange),
-        ("Thu", "Smooth", Color.green),
-        ("Fri", "Severe", Color.red),
+    // MARK: - Step 2: Plan Ahead (Forecast Fan)
+
+    // MARK: - Step 2: 14-Day Forecast (Calendar)
+
+    private let calendarData: [(day: Int, color: Color)] = [
+        (15, Color(red: 0.30, green: 0.69, blue: 0.31)),
+        (16, Color(red: 0.30, green: 0.69, blue: 0.31)),
+        (17, Color(red: 0.80, green: 0.68, blue: 0.0)),
+        (18, Color(red: 0.30, green: 0.69, blue: 0.31)),
+        (19, Color(red: 0.30, green: 0.69, blue: 0.31)),
+        (20, Color(red: 1.0, green: 0.60, blue: 0.0)),
+        (21, Color(red: 0.30, green: 0.69, blue: 0.31)),
+        (22, Color(red: 0.80, green: 0.68, blue: 0.0)),
+        (23, Color(red: 0.30, green: 0.69, blue: 0.31)),
+        (24, Color(red: 0.30, green: 0.69, blue: 0.31)),
+        (25, Color(red: 0.30, green: 0.69, blue: 0.31)),
+        (26, Color(red: 0.96, green: 0.26, blue: 0.21)),
+        (27, Color(red: 0.30, green: 0.69, blue: 0.31)),
+        (28, Color(red: 0.80, green: 0.68, blue: 0.0)),
     ]
 
-    private var forecastFanScreen: some View {
+    private var featurePlanScreen: some View {
         onboardingPage {
             VStack(spacing: 0) {
-                Spacer(minLength: 20)
+                Spacer()
 
-                ZStack {
-                    ForEach(0..<5, id: \.self) { i in
-                        let angles: [Double] = [-20, -10, 0, 10, 20]
-                        let xOffsets: [CGFloat] = [-60, -30, 0, 30, 60]
+                calendarWidget
+                    .scaleEffect(iconScale)
+                    .opacity(iconOpacity)
 
-                        forecastFanCard(index: i)
-                            .rotationEffect(.degrees(fanCardsVisible[i] ? angles[i] : 0))
-                            .offset(x: fanCardsVisible[i] ? xOffsets[i] : 0)
-                            .opacity(fanCardsVisible[i] ? 1.0 : 0)
-                            .zIndex(Double(i))
-                    }
-                }
-                .frame(height: 280)
-
-                Spacer().frame(height: 32)
+                Spacer().frame(height: 24)
 
                 VStack(spacing: 4) {
-                    Text("3-Day")
+                    Text("14-Day")
                         .font(.system(size: 36, weight: .heavy))
                         .foregroundColor(accent)
-                    Text("Turbulence Forecast")
+                    Text("Forecast")
                         .font(.system(size: 36, weight: .heavy))
                         .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                        .minimumScaleFactor(0.7)
                 }
                 .opacity(titleOpacity)
 
                 Spacer().frame(height: 12)
 
-                Text("Plan ahead with predictions based\non upper-atmosphere wind data")
+                Text("Plan ahead — check turbulence\nup to two weeks before your flight")
                     .font(.system(size: 17))
                     .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.5))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .opacity(subtitleOpacity)
 
-                Spacer(minLength: 24)
+                Spacer().frame(height: 32)
 
                 continueButton { withAnimation { currentStep = 3 } }
                     .padding(.bottom, 50)
@@ -373,112 +395,102 @@ struct OnboardingView: View {
         }
     }
 
-    private func forecastFanCard(index: Int) -> some View {
-        let item = fanSeverities[index]
-        return VStack(spacing: 14) {
-            Text(item.label)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white.opacity(0.8))
+    private var calendarWidget: some View {
+        VStack(spacing: 10) {
+            HStack {
+                Text("Feb 15 — Mar 1")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                Spacer()
+                Image(systemName: "airplane.departure")
+                    .font(.system(size: 14))
+                    .foregroundColor(accent)
+            }
 
-            Circle()
-                .fill(.white.opacity(0.3))
-                .frame(width: 48, height: 48)
-                .overlay(
-                    Circle()
-                        .fill(.white)
-                        .frame(width: 28, height: 28)
-                )
+            let dayLabels = ["M", "T", "W", "T", "F", "S", "S"]
+            HStack(spacing: 6) {
+                ForEach(0..<7, id: \.self) { i in
+                    Text(dayLabels[i])
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
+                }
+            }
 
-            Text(item.severity)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white)
+            HStack(spacing: 6) {
+                ForEach(0..<7, id: \.self) { i in calendarCell(index: i) }
+            }
 
-            // Mini bar chart
-            HStack(spacing: 4) {
-                ForEach(0..<5, id: \.self) { j in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(.white.opacity(j <= index ? 0.8 : 0.2))
-                        .frame(width: 12, height: CGFloat(8 + j * 6))
+            HStack(spacing: 6) {
+                ForEach(7..<14, id: \.self) { i in calendarCell(index: i) }
+            }
+
+            HStack(spacing: 12) {
+                calendarLegend(color: Color(red: 0.30, green: 0.69, blue: 0.31), label: "Smooth")
+                calendarLegend(color: Color(red: 0.80, green: 0.68, blue: 0.0), label: "Light")
+                calendarLegend(color: Color(red: 1.0, green: 0.60, blue: 0.0), label: "Moderate")
+                calendarLegend(color: Color(red: 0.96, green: 0.26, blue: 0.21), label: "Severe")
+            }
+            .padding(.top, 4)
+        }
+        .padding(20)
+        .background(Color.white)
+        .cornerRadius(24)
+        .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 10)
+        .padding(.horizontal, 16)
+    }
+
+    private func calendarCell(index: Int) -> some View {
+        let item = calendarData[index]
+        return Text("\(item.day)")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 36)
+            .background(item.color)
+            .cornerRadius(8)
+            .scaleEffect(calendarCellsVisible[index] ? 1.0 : 0.3)
+            .opacity(calendarCellsVisible[index] ? 1.0 : 0)
+    }
+
+    private func calendarLegend(color: Color, label: String) -> some View {
+        HStack(spacing: 4) {
+            Circle().fill(color).frame(width: 6, height: 6)
+            Text(label).font(.system(size: 11)).foregroundColor(.secondary)
+        }
+    }
+
+    private func startCalendarAnimation() {
+        calendarCellsVisible = Array(repeating: false, count: 14)
+        for i in 0..<14 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3 + Double(i) * 0.06) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    calendarCellsVisible[i] = true
                 }
             }
         }
-        .padding(.vertical, 20)
-        .frame(width: 150, height: 220)
-        .background(item.color.gradient)
-        .cornerRadius(16)
     }
 
-    private func startFanAnimation() {
-        for i in 0..<5 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1 + Double(i) * 0.08) {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                    fanCardsVisible[i] = true
-                }
-            }
-        }
-    }
+    // MARK: - Step 3: Understand Every Bump
 
-    // MARK: - Step 3: Flight Levels Carousel
+    // MARK: - Step 3: Understand Every Bump (Turbulence Map)
 
-    private let levelRow1: [(level: String, feet: String, icon: String, color: Color)] = [
-        ("FL390", "39,000 ft", "airplane", .red),
-        ("FL340", "34,000 ft", "airplane", .orange),
-        ("FL300", "30,000 ft", "airplane", .yellow),
-        ("FL240", "24,000 ft", "airplane", .green),
-        ("FL180", "18,000 ft", "airplane", .blue),
-        ("FL100", "10,000 ft", "airplane", .cyan),
-    ]
-
-    private let levelRow2: [(label: String, icon: String, color: Color)] = [
-        ("Wind Shear", "wind", .orange),
-        ("Jet Stream", "arrow.right", .purple),
-        ("CAT", "cloud.bolt", .red),
-        ("Mountain Wave", "mountain.2", .green),
-        ("Convective", "cloud.bolt.rain", .yellow),
-        ("SIGMET", "exclamationmark.triangle", .red),
-    ]
-
-    private var feature3Screen: some View {
+    private var featureUnderstandScreen: some View {
         onboardingPage {
             VStack(spacing: 0) {
-                Spacer(minLength: 20)
+                Spacer()
 
-                VStack(spacing: 12) {
-                    // Row 1: Flight levels
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
-                            // Double the items for seamless loop feel
-                            ForEach(0..<12, id: \.self) { i in
-                                let item = levelRow1[i % levelRow1.count]
-                                levelCard(level: item.level, feet: item.feet, color: item.color)
-                            }
-                        }
-                        .offset(x: levelCardsRow1Offset)
-                    }
-                    .frame(height: 90)
+                turbulenceMapWidget
+                    .scaleEffect(iconScale)
+                    .opacity(iconOpacity)
 
-                    // Row 2: Turbulence types
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
-                            ForEach(0..<12, id: \.self) { i in
-                                let item = levelRow2[i % levelRow2.count]
-                                typeCard(label: item.label, icon: item.icon, color: item.color)
-                            }
-                        }
-                        .offset(x: levelCardsRow2Offset)
-                    }
-                    .frame(height: 90)
-                }
-                .scaleEffect(iconScale)
-                .opacity(iconOpacity)
-
-                Spacer().frame(height: 32)
+                Spacer().frame(height: 24)
 
                 VStack(spacing: 4) {
-                    Text("Every Altitude")
+                    Text("Understand")
                         .font(.system(size: 36, weight: .heavy))
                         .foregroundColor(accent)
-                    Text("Covered")
+                    Text("Every Bump")
                         .font(.system(size: 36, weight: .heavy))
                         .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
                 }
@@ -486,14 +498,14 @@ struct OnboardingView: View {
 
                 Spacer().frame(height: 12)
 
-                Text("Turbulence data at every flight level\nfrom FL100 to FL390")
+                Text("From a gentle ripple to a bumpy road —\nwe explain each level in plain words")
                     .font(.system(size: 17))
                     .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.5))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .opacity(subtitleOpacity)
 
-                Spacer(minLength: 24)
+                Spacer().frame(height: 32)
 
                 continueButton { withAnimation { currentStep = 4 } }
                     .padding(.bottom, 50)
@@ -502,229 +514,143 @@ struct OnboardingView: View {
         }
     }
 
-    private func levelCard(level: String, feet: String, color: Color) -> some View {
-        VStack(spacing: 6) {
-            Image(systemName: "airplane")
-                .font(.system(size: 18))
-                .foregroundColor(color)
-            Text(level)
-                .font(.system(size: 14, weight: .bold, design: .monospaced))
-                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-            Text(feet)
-                .font(.system(size: 11))
-                .foregroundColor(.secondary)
-        }
-        .frame(width: 100, height: 80)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.06), radius: 6, x: 0, y: 2)
-    }
+    private var turbulenceMapWidget: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Turbulence Map")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.white.opacity(0.8))
+                Spacer()
+                HStack(spacing: 4) {
+                    Circle().fill(Color.green).frame(width: 6, height: 6)
+                    Text("Live")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.green)
+                }
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(Color.green.opacity(0.15))
+                .cornerRadius(8)
+            }
+            .padding(.horizontal, 20).padding(.top, 20)
 
-    private func typeCard(label: String, icon: String, color: Color) -> some View {
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(.white)
-                .frame(width: 36, height: 36)
-                .background(color.gradient)
-                .cornerRadius(10)
-            Text(label)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .frame(width: 100, height: 80)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.06), radius: 6, x: 0, y: 2)
-    }
+            GeometryReader { geo in
+                let w = geo.size.width
+                let h = geo.size.height
+                let route = mapRoutePath(width: w, height: h)
 
-    private func startLevelCarouselAnimation() {
-        withAnimation(.linear(duration: 14).repeatForever(autoreverses: false)) {
-            levelCardsRow1Offset = -400
-        }
-        withAnimation(.linear(duration: 14).repeatForever(autoreverses: false).delay(0.3)) {
-            levelCardsRow2Offset = 400
-        }
-    }
-
-    // MARK: - Step 4: Live Pilot Reports
-
-    private let pirepCards: [(aircraft: String, level: String, severity: String, color: Color, icon: String)] = [
-        ("B738", "FL350", "Moderate", .orange, "cloud.bolt.fill"),
-        ("A320", "FL300", "Light", .yellow, "cloud.fill"),
-        ("B777", "FL390", "Severe", .red, "exclamationmark.triangle.fill"),
-    ]
-
-    private var feature4Screen: some View {
-        onboardingPage {
-            VStack(spacing: 0) {
-                Spacer(minLength: 20)
-
-                VStack(spacing: 12) {
-                    ForEach(0..<3, id: \.self) { i in
-                        let card = pirepCards[i]
-                        HStack(spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(card.color.gradient)
-                                    .frame(width: 48, height: 48)
-                                Image(systemName: card.icon)
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.white)
-                            }
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("\(card.aircraft) at \(card.level)")
-                                    .font(.system(size: 17, weight: .semibold))
-                                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                                Text("\(card.severity) Turbulence")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(card.color)
-                            }
-                            Spacer()
-                            Text("PIREP")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(card.color)
-                                .cornerRadius(6)
-                        }
-                        .padding(16)
-                        .background(Color.white)
-                        .cornerRadius(16)
-                        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
-                        .scaleEffect(reportCardsVisible[i] ? 1.0 : 0.3)
-                        .opacity(reportCardsVisible[i] ? 1.0 : 0)
+                // Subtle grid
+                ForEach(0..<4, id: \.self) { i in
+                    Path { p in
+                        let y = h * CGFloat(i + 1) / 5
+                        p.move(to: CGPoint(x: 0, y: y))
+                        p.addLine(to: CGPoint(x: w, y: y))
                     }
+                    .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
                 }
-                .padding(.horizontal, 16)
-
-                Spacer().frame(height: 32)
-
-                VStack(spacing: 4) {
-                    Text("Live Pilot")
-                        .font(.system(size: 36, weight: .heavy))
-                        .foregroundColor(accent)
-                    Text("Reports")
-                        .font(.system(size: 36, weight: .heavy))
-                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
+                ForEach(0..<6, id: \.self) { i in
+                    Path { p in
+                        let x = w * CGFloat(i + 1) / 7
+                        p.move(to: CGPoint(x: x, y: 0))
+                        p.addLine(to: CGPoint(x: x, y: h))
+                    }
+                    .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
                 }
-                .opacity(titleOpacity)
 
-                Spacer().frame(height: 12)
+                // Green segment 0–35%
+                route
+                    .trim(from: 0, to: min(routeDrawProgress, 0.35))
+                    .stroke(Color(red: 0.30, green: 0.69, blue: 0.31), style: StrokeStyle(lineWidth: 3, lineCap: .round))
 
-                Text("Real-time turbulence reports from pilots\naround the world, updated every 5 minutes")
-                    .font(.system(size: 17))
-                    .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.5))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .opacity(subtitleOpacity)
+                // Yellow segment 35–55%
+                if routeDrawProgress > 0.35 {
+                    route
+                        .trim(from: 0.35, to: min(routeDrawProgress, 0.55))
+                        .stroke(Color(red: 0.80, green: 0.68, blue: 0.0), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                }
 
-                Spacer(minLength: 24)
+                // Orange segment 55–70%
+                if routeDrawProgress > 0.55 {
+                    route
+                        .trim(from: 0.55, to: min(routeDrawProgress, 0.70))
+                        .stroke(Color(red: 1.0, green: 0.60, blue: 0.0), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                }
 
-                continueButton { withAnimation { currentStep = 5 } }
-                    .padding(.bottom, 50)
+                // Green segment 70–100%
+                if routeDrawProgress > 0.70 {
+                    route
+                        .trim(from: 0.70, to: routeDrawProgress)
+                        .stroke(Color(red: 0.30, green: 0.69, blue: 0.31), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                }
+
+                // Airport markers
+                Circle().fill(Color.white).frame(width: 8, height: 8)
+                    .position(x: 24, y: h * 0.65)
+                Text("JFK")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white.opacity(0.7))
+                    .position(x: 24, y: h * 0.65 + 14)
+
+                Circle().fill(Color.white).frame(width: 8, height: 8)
+                    .position(x: w - 24, y: h * 0.35)
+                Text("LHR")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white.opacity(0.7))
+                    .position(x: w - 24, y: h * 0.35 + 14)
             }
-            .padding(.horizontal, 24)
-        }
-    }
+            .frame(height: 140)
+            .padding(.horizontal, 16).padding(.vertical, 12)
 
-    private func startReportCardsAnimation() {
-        for i in 0..<3 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2 + Double(i) * 0.2) {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.65)) {
-                    reportCardsVisible[i] = true
-                }
+            HStack(spacing: 16) {
+                mapLegendItem(color: Color(red: 0.30, green: 0.69, blue: 0.31), label: "Smooth")
+                mapLegendItem(color: Color(red: 0.80, green: 0.68, blue: 0.0), label: "Light")
+                mapLegendItem(color: Color(red: 1.0, green: 0.60, blue: 0.0), label: "Moderate")
             }
+            .padding(.bottom, 16)
+            .opacity(mapLegendOpacity)
+        }
+        .background(Color(red: 0.08, green: 0.10, blue: 0.18))
+        .cornerRadius(24)
+        .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 10)
+        .padding(.horizontal, 16)
+    }
+
+    private func mapRoutePath(width: CGFloat, height: CGFloat) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: 24, y: height * 0.65))
+        path.addCurve(
+            to: CGPoint(x: width - 24, y: height * 0.35),
+            control1: CGPoint(x: width * 0.35, y: height * 0.15),
+            control2: CGPoint(x: width * 0.65, y: height * 0.55)
+        )
+        return path
+    }
+
+    private func mapLegendItem(color: Color, label: String) -> some View {
+        HStack(spacing: 4) {
+            RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 12, height: 4)
+            Text(label).font(.system(size: 11, weight: .medium)).foregroundColor(.white.opacity(0.6))
         }
     }
 
-    // MARK: - Step 5: Trusted Data (Quadrants)
-
-    private var dataQuadrantsScreen: some View {
-        onboardingPage {
-            VStack(spacing: 0) {
-                Spacer(minLength: 20)
-
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                    dataQuadrant(icon: "building.columns.fill", title: "NOAA", subtitle: "Atmospheric models", color: .blue, index: 0)
-                    dataQuadrant(icon: "shield.checkered", title: "FAA AWC", subtitle: "Aviation weather", color: .green, index: 1)
-                    dataQuadrant(icon: "globe.americas.fill", title: "Open-Meteo", subtitle: "Global forecasts", color: .purple, index: 2)
-                    dataQuadrant(icon: "bubble.left.and.bubble.right.fill", title: "PIREPs", subtitle: "Real-time reports", color: .orange, index: 3)
-                }
-                .padding(.horizontal, 16)
-
-                Spacer().frame(height: 32)
-
-                VStack(spacing: 4) {
-                    Text("Trusted")
-                        .font(.system(size: 36, weight: .heavy))
-                        .foregroundColor(accent)
-                    Text("Aviation Data")
-                        .font(.system(size: 36, weight: .heavy))
-                        .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                }
-                .opacity(titleOpacity)
-
-                Spacer().frame(height: 12)
-
-                Text("Powered by official weather services\nand real pilot reports worldwide")
-                    .font(.system(size: 17))
-                    .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.5))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .opacity(subtitleOpacity)
-
-                Spacer(minLength: 24)
-
-                continueButton { withAnimation { currentStep = 6 } }
-                    .padding(.bottom, 50)
-            }
-            .padding(.horizontal, 24)
+    private func startMapAnimation() {
+        routeDrawProgress = 0
+        mapLegendOpacity = 0
+        withAnimation(.easeInOut(duration: 1.8).delay(0.4)) {
+            routeDrawProgress = 1.0
+        }
+        withAnimation(.easeOut(duration: 0.5).delay(2.0)) {
+            mapLegendOpacity = 1.0
         }
     }
 
-    private func dataQuadrant(icon: String, title: String, subtitle: String, color: Color, index: Int) -> some View {
-        VStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 28))
-                .foregroundColor(color)
-            Text(title)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-            Text(subtitle)
-                .font(.system(size: 13))
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 120)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
-        .scaleEffect(quadrantVisible[index] ? 1.0 : 0.3)
-        .opacity(quadrantVisible[index] ? 1.0 : 0)
-    }
+    // MARK: - Quiz 1: Does turbulence make your heart race?
 
-    private func startQuadrantAnimations() {
-        for i in 0..<4 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2 + Double(i) * 0.15) {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                    quadrantVisible[i] = true
-                }
-            }
-        }
-    }
-
-    // MARK: - Quiz 1: Flight Anxiety
-
-    private var quiz1Screen: some View {
+    private var quizAnxietyScreen: some View {
         onboardingPage {
             VStack(spacing: 0) {
                 Spacer().frame(height: 60)
 
-                Text("How do you feel\nabout flying?")
+                Text("Does turbulence make\nyour heart race?")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
                     .multilineTextAlignment(.center)
@@ -733,34 +659,34 @@ struct OnboardingView: View {
                 Spacer().frame(height: 40)
 
                 VStack(spacing: 12) {
-                    quizOption("I love flying", subtitle: "Enjoy every minute in the air", isSelected: quizAnswer1 == "love") { quizAnswer1 = "love" }
+                    quizOption("Not really", subtitle: "I stay calm during flights", isSelected: quizAnxiety == "calm") { quizAnxiety = "calm" }
                         .offset(y: cardOffsets[0]).opacity(cardsOpacity)
-                    quizOption("A bit nervous", subtitle: "Some anxiety, especially during bumps", isSelected: quizAnswer1 == "nervous") { quizAnswer1 = "nervous" }
+                    quizOption("A little", subtitle: "I grip the armrest during bumps", isSelected: quizAnxiety == "little") { quizAnxiety = "little" }
                         .offset(y: cardOffsets[1]).opacity(cardsOpacity)
-                    quizOption("Quite anxious", subtitle: "Turbulence really worries me", isSelected: quizAnswer1 == "anxious") { quizAnswer1 = "anxious" }
+                    quizOption("Yes, definitely", subtitle: "My heart pounds and palms sweat", isSelected: quizAnxiety == "yes") { quizAnxiety = "yes" }
                         .offset(y: cardOffsets[2]).opacity(cardsOpacity)
-                    quizOption("Fear of flying", subtitle: "I get very stressed before and during flights", isSelected: quizAnswer1 == "fear") { quizAnswer1 = "fear" }
+                    quizOption("I can barely breathe", subtitle: "I have full panic attacks", isSelected: quizAnxiety == "panic") { quizAnxiety = "panic" }
                         .offset(y: cardOffsets[3]).opacity(cardsOpacity)
                 }
                 .padding(.horizontal, 16)
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer1 == nil) { withAnimation { currentStep = 7 } }
+                continueButton(disabled: quizAnxiety == nil) { withAnimation { currentStep = 5 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    // MARK: - Quiz 2: Flight Frequency
+    // MARK: - Quiz 2: What worries you most?
 
-    private var quiz2Screen: some View {
+    private var quizWorstFearScreen: some View {
         onboardingPage {
             VStack(spacing: 0) {
                 Spacer().frame(height: 60)
 
-                Text("How often do\nyou fly?")
+                Text("What worries you most\nabout flying?")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
                     .multilineTextAlignment(.center)
@@ -769,34 +695,34 @@ struct OnboardingView: View {
                 Spacer().frame(height: 40)
 
                 VStack(spacing: 12) {
-                    quizOption("Frequent flyer", subtitle: "Several times a month", isSelected: quizAnswer2 == "frequent") { quizAnswer2 = "frequent" }
+                    quizOption("Sudden turbulence", subtitle: "Not knowing when it will hit", isSelected: quizWorstFear == "turbulence") { quizWorstFear = "turbulence" }
                         .offset(y: cardOffsets[0]).opacity(cardsOpacity)
-                    quizOption("Regular traveler", subtitle: "A few times a year", isSelected: quizAnswer2 == "regular") { quizAnswer2 = "regular" }
+                    quizOption("Is the plane safe?", subtitle: "What if something goes wrong", isSelected: quizWorstFear == "safety") { quizWorstFear = "safety" }
                         .offset(y: cardOffsets[1]).opacity(cardsOpacity)
-                    quizOption("Occasional", subtitle: "Once or twice a year", isSelected: quizAnswer2 == "occasional") { quizAnswer2 = "occasional" }
+                    quizOption("Feeling trapped", subtitle: "Can't get off if I want to", isSelected: quizWorstFear == "trapped") { quizWorstFear = "trapped" }
                         .offset(y: cardOffsets[2]).opacity(cardsOpacity)
-                    quizOption("Rare / First time", subtitle: "Hardly ever or never flown", isSelected: quizAnswer2 == "rare") { quizAnswer2 = "rare" }
+                    quizOption("Losing control", subtitle: "The panic itself scares me", isSelected: quizWorstFear == "control") { quizWorstFear = "control" }
                         .offset(y: cardOffsets[3]).opacity(cardsOpacity)
                 }
                 .padding(.horizontal, 16)
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer2 == nil) { withAnimation { currentStep = 8 } }
+                continueButton(disabled: quizWorstFear == nil) { withAnimation { currentStep = 6 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    // MARK: - Quiz 3: Turbulence Knowledge
+    // MARK: - Quiz 3: Has anxiety changed your plans?
 
-    private var quiz3Screen: some View {
+    private var quizImpactScreen: some View {
         onboardingPage {
             VStack(spacing: 0) {
                 Spacer().frame(height: 60)
 
-                Text("How familiar are you\nwith turbulence?")
+                Text("Has flight anxiety ever\nchanged your plans?")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
                     .multilineTextAlignment(.center)
@@ -805,45 +731,45 @@ struct OnboardingView: View {
                 Spacer().frame(height: 40)
 
                 VStack(spacing: 12) {
-                    quizOption("Pilot / Aviation pro", subtitle: "I read METARs, TAFs, and PIREPs", isSelected: quizAnswer3 == "pilot") { quizAnswer3 = "pilot" }
+                    quizOption("Never", subtitle: "I fly without issues", isSelected: quizImpact == "never") { quizImpact = "never" }
                         .offset(y: cardOffsets[0]).opacity(cardsOpacity)
-                    quizOption("I know the basics", subtitle: "Light, moderate, severe — I get it", isSelected: quizAnswer3 == "basics") { quizAnswer3 = "basics" }
+                    quizOption("I've considered it", subtitle: "Thought about canceling a flight", isSelected: quizImpact == "considered") { quizImpact = "considered" }
                         .offset(y: cardOffsets[1]).opacity(cardsOpacity)
-                    quizOption("Heard of it", subtitle: "I know it exists but not much more", isSelected: quizAnswer3 == "heard") { quizAnswer3 = "heard" }
+                    quizOption("Yes, changed plans", subtitle: "Picked driving over flying", isSelected: quizImpact == "changed") { quizImpact = "changed" }
                         .offset(y: cardOffsets[2]).opacity(cardsOpacity)
-                    quizOption("Complete beginner", subtitle: "I'd like to learn", isSelected: quizAnswer3 == "beginner") { quizAnswer3 = "beginner" }
+                    quizOption("I avoid flying", subtitle: "I haven't flown in years", isSelected: quizImpact == "avoid") { quizImpact = "avoid" }
                         .offset(y: cardOffsets[3]).opacity(cardsOpacity)
                 }
                 .padding(.horizontal, 16)
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer3 == nil) { withAnimation { currentStep = 9 } }
+                continueButton(disabled: quizImpact == nil) { withAnimation { currentStep = 7 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    // MARK: - Quiz 4: What interests you (multi-select)
+    // MARK: - Quiz 4: What would help you fly calmer? (multi-select)
 
-    private let interestOptions: [(id: String, icon: String, title: String)] = [
-        ("route", "✈️", "Route turbulence forecast"),
-        ("levels", "📊", "Detailed flight level data"),
-        ("tips", "💡", "Tips for handling turbulence"),
-        ("notifications", "🔔", "Pre-flight notifications"),
-        ("map", "🗺️", "Real-time turbulence map"),
-        ("multiday", "📅", "Multi-day forecast"),
-        ("pilotdata", "👨‍✈️", "Pilot-grade weather data"),
-        ("anxiety", "🧘", "Anxiety management advice"),
+    private let helperOptions: [(id: String, icon: String, title: LocalizedStringKey)] = [
+        ("forecast", "✈️", "Knowing turbulence in advance"),
+        ("intensity", "📊", "Seeing exactly how strong it is"),
+        ("breathing", "🫁", "Breathing exercises during bumps"),
+        ("alerts", "🔔", "Alerts before turbulence zones"),
+        ("planning", "📅", "Planning days ahead"),
+        ("understand", "💬", "Understanding what's happening"),
+        ("tips", "🧘", "Tips to manage anxiety"),
+        ("offline", "📱", "Works offline on the plane"),
     ]
 
-    private var quiz4Screen: some View {
+    private var quizHelpScreen: some View {
         onboardingPage {
             VStack(spacing: 0) {
                 Spacer().frame(height: 60)
 
-                Text("What would\nhelp you most?")
+                Text("What would help you\nfly calmer?")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
                     .multilineTextAlignment(.center)
@@ -859,8 +785,8 @@ struct OnboardingView: View {
                 Spacer().frame(height: 28)
 
                 VStack(spacing: 8) {
-                    ForEach(Array(interestOptions.enumerated()), id: \.element.id) { index, item in
-                        interestCheckbox(id: item.id, icon: item.icon, title: item.title)
+                    ForEach(Array(helperOptions.enumerated()), id: \.element.id) { index, item in
+                        helperCheckbox(id: item.id, icon: item.icon, title: item.title)
                             .offset(y: index < 4 ? cardOffsets[index] : cardOffsets[min(index - 4, 3)])
                             .opacity(cardsOpacity)
                     }
@@ -869,19 +795,19 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: selectedInterests.isEmpty) { withAnimation { currentStep = 10 } }
+                continueButton(disabled: selectedHelpers.isEmpty) { withAnimation { currentStep = 8 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    private func interestCheckbox(id: String, icon: String, title: String) -> some View {
-        let isSelected = selectedInterests.contains(id)
+    private func helperCheckbox(id: String, icon: String, title: LocalizedStringKey) -> some View {
+        let isSelected = selectedHelpers.contains(id)
         return Button {
             withAnimation(.easeInOut(duration: 0.2)) {
-                if isSelected { selectedInterests.remove(id) }
-                else { selectedInterests.insert(id) }
+                if isSelected { selectedHelpers.remove(id) }
+                else { selectedHelpers.insert(id) }
             }
         } label: {
             HStack(spacing: 10) {
@@ -909,14 +835,14 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Quiz 5: When do you check
+    // MARK: - Quiz 5: When is your next flight?
 
-    private var quiz5Screen: some View {
+    private var quizNextFlightScreen: some View {
         onboardingPage {
             VStack(spacing: 0) {
                 Spacer().frame(height: 60)
 
-                Text("When do you usually\ncheck your flight?")
+                Text("When is your\nnext flight?")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(Color(red: 0.1, green: 0.1, blue: 0.15))
                     .multilineTextAlignment(.center)
@@ -924,7 +850,7 @@ struct OnboardingView: View {
 
                 Spacer().frame(height: 12)
 
-                Text("We'll optimize your forecast range")
+                Text("We'll have your forecast ready")
                     .font(.system(size: 15))
                     .foregroundColor(Color(red: 0.45, green: 0.45, blue: 0.5))
                     .opacity(subtitleOpacity)
@@ -932,20 +858,20 @@ struct OnboardingView: View {
                 Spacer().frame(height: 40)
 
                 VStack(spacing: 12) {
-                    quizOption("Day of the flight", subtitle: "I check right before traveling", isSelected: quizAnswer5 == "sameday") { quizAnswer5 = "sameday" }
+                    quizOption("This week", subtitle: "I need to prepare now", isSelected: quizNextFlight == "week") { quizNextFlight = "week" }
                         .offset(y: cardOffsets[0]).opacity(cardsOpacity)
-                    quizOption("1–2 days before", subtitle: "I like a bit of advance notice", isSelected: quizAnswer5 == "1-2days") { quizAnswer5 = "1-2days" }
+                    quizOption("This month", subtitle: "Time to get ready", isSelected: quizNextFlight == "month") { quizNextFlight = "month" }
                         .offset(y: cardOffsets[1]).opacity(cardsOpacity)
-                    quizOption("3–5 days before", subtitle: "I plan well ahead", isSelected: quizAnswer5 == "3-5days") { quizAnswer5 = "3-5days" }
+                    quizOption("In a few months", subtitle: "I want to start preparing early", isSelected: quizNextFlight == "months") { quizNextFlight = "months" }
                         .offset(y: cardOffsets[2]).opacity(cardsOpacity)
-                    quizOption("A week or more", subtitle: "I want the longest possible forecast", isSelected: quizAnswer5 == "week") { quizAnswer5 = "week" }
+                    quizOption("Not planned yet", subtitle: "But I want to be ready", isSelected: quizNextFlight == "none") { quizNextFlight = "none" }
                         .offset(y: cardOffsets[3]).opacity(cardsOpacity)
                 }
                 .padding(.horizontal, 16)
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer5 == nil) { withAnimation { currentStep = 11 } }
+                continueButton(disabled: quizNextFlight == nil) { withAnimation { currentStep = 9 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
@@ -954,11 +880,11 @@ struct OnboardingView: View {
 
     // MARK: - Dark Setup Screen
 
-    private let setupSteps = [
-        "Loading atmospheric models…",
-        "Calibrating turbulence algorithms…",
-        "Connecting to weather stations…",
-        "Personalizing your experience…"
+    private let setupSteps: [LocalizedStringKey] = [
+        "Analyzing global turbulence data\u{2026}",
+        "Setting up real-time alerts\u{2026}",
+        "Preparing your personal forecast\u{2026}",
+        "Optimizing for your comfort\u{2026}"
     ]
 
     private let creamColor = Color(red: 0.98, green: 0.96, blue: 0.93)
@@ -972,7 +898,7 @@ struct OnboardingView: View {
                     VStack(spacing: 0) {
                         Spacer().frame(height: 80)
 
-                        Text("Preparing Your\nForecast Engine")
+                        Text("Building Your\nCalm Flight Plan")
                             .font(.system(size: isIPad ? 48 : 38, weight: .bold, design: .serif))
                             .foregroundColor(creamColor)
                             .multilineTextAlignment(.center)
@@ -1011,9 +937,10 @@ struct OnboardingView: View {
                                 Text("Trusted by")
                                     .font(.system(size: 18))
                                     .foregroundColor(creamColor.opacity(0.7))
-                                Text("Travelers & Pilots")
+                                Text("Anxious Flyers Worldwide")
                                     .font(.system(size: isIPad ? 40 : 32, weight: .bold, design: .serif))
                                     .foregroundColor(creamColor)
+                                    .multilineTextAlignment(.center)
                             }
                             .transition(.opacity.combined(with: .scale))
 
@@ -1031,14 +958,14 @@ struct OnboardingView: View {
         }
     }
 
-    private func darkSetupStepRow(text: String, isActive: Bool, isCompleted: Bool) -> some View {
+    private func darkSetupStepRow(text: LocalizedStringKey, isActive: Bool, isCompleted: Bool) -> some View {
         HStack(spacing: 12) {
             if isCompleted {
-                Text("✓").font(.system(size: 16, weight: .bold)).foregroundColor(creamColor.opacity(0.7)).frame(width: 20)
+                Text("\u{2713}").font(.system(size: 16, weight: .bold)).foregroundColor(creamColor.opacity(0.7)).frame(width: 20)
             } else if isActive {
-                Text("◉").font(.system(size: 16)).foregroundColor(creamColor).frame(width: 20)
+                Text("\u{25C9}").font(.system(size: 16)).foregroundColor(creamColor).frame(width: 20)
             } else {
-                Text("○").font(.system(size: 16)).foregroundColor(creamColor.opacity(0.5)).frame(width: 20)
+                Text("\u{25CB}").font(.system(size: 16)).foregroundColor(creamColor.opacity(0.5)).frame(width: 20)
             }
             Text(text)
                 .font(.system(size: 16))
@@ -1050,90 +977,42 @@ struct OnboardingView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 16) {
                 darkTestimonialCard(
-                    text: "Finally I can check turbulence before I fly. Really helps with my anxiety.",
+                    text: "\"I used to dread every flight. Now I check the forecast and know exactly what to expect.\"",
                     author: "Sarah M.", role: "Nervous Flyer"
                 )
                 darkTestimonialCard(
-                    text: "I use this before every flight. The forecast has been surprisingly accurate.",
+                    text: "\"The not-knowing was the worst part. Seeing the forecast before I fly helps me relax.\"",
                     author: "David K.", role: "Frequent Traveler"
                 )
                 darkTestimonialCard(
-                    text: "The flight level breakdown is very useful for pre-flight planning.",
+                    text: "\"I recommend this to nervous passengers. Knowledge really does replace fear.\"",
                     author: "Capt. James R.", role: "Commercial Pilot"
                 )
                 darkTestimonialCard(
-                    text: "So simple. Enter your route and get instant results. Love it!",
-                    author: "Emma L.", role: "Business Traveler"
+                    text: "\"My hands used to shake for days before a flight. Now I just check the app and breathe.\"",
+                    author: "Emma L.", role: "Anxious Traveler"
                 )
             }
             .padding(.horizontal, 24)
         }
     }
 
-    private func darkTestimonialCard(text: String, author: String, role: String) -> some View {
+    private func darkTestimonialCard(text: LocalizedStringKey, author: String, role: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 2) {
                 ForEach(0..<5, id: \.self) { _ in
                     Image(systemName: "star.fill").font(.system(size: 12)).foregroundColor(.white)
                 }
             }
-            Text("\"\(text)\"")
+            Text(text)
                 .font(.system(size: 17)).foregroundColor(creamColor).lineSpacing(2)
-            Text("— \(author), \(role)")
-                .font(.system(size: 14, weight: .medium)).foregroundColor(creamColor.opacity(0.6))
+            Text("— \(author), ").font(.system(size: 14, weight: .medium)).foregroundColor(creamColor.opacity(0.6)) +
+            Text(role).font(.system(size: 14, weight: .medium)).foregroundColor(creamColor.opacity(0.6))
         }
         .padding(20)
         .frame(width: isIPad ? 340 : 280)
         .background(Color.white.opacity(0.1))
         .cornerRadius(16)
-    }
-
-    // MARK: - Completion Screen
-
-    private var completionScreen: some View {
-        onboardingPage {
-            VStack(spacing: 0) {
-                Spacer().frame(height: 80)
-
-                Text("✈️")
-                    .font(.system(size: 80))
-                    .scaleEffect(iconScale)
-                    .opacity(iconOpacity)
-
-                Spacer().frame(height: 30)
-
-                Text("You're Ready to Fly")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(Color(red: 0.15, green: 0.15, blue: 0.2))
-                    .multilineTextAlignment(.center)
-                    .opacity(titleOpacity)
-
-                Spacer().frame(height: 16)
-
-                Text("Your personalized turbulence forecast\nis set up and ready to go.")
-                    .font(.system(size: 19))
-                    .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.4))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 16)
-                    .opacity(subtitleOpacity)
-
-                Spacer(minLength: 40)
-
-                Button {
-                    onComplete()
-                } label: {
-                    Text("Get Started")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: isIPad ? 440 : 340)
-                        .frame(height: 64)
-                        .background(Color.black)
-                        .cornerRadius(32)
-                }
-                .padding(.bottom, 50)
-            }
-            .padding(.horizontal, 24)
-        }
     }
 
     // MARK: - Setup Animation
@@ -1151,7 +1030,7 @@ struct OnboardingView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) { showSetupStats = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                    withAnimation { currentStep = 12 }
+                    onComplete()
                 }
             }
             return
@@ -1196,7 +1075,7 @@ struct OnboardingView: View {
         .disabled(disabled)
     }
 
-    private func quizOption(_ title: String, subtitle: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    private func quizOption(_ title: LocalizedStringKey, subtitle: LocalizedStringKey, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
