@@ -2,10 +2,22 @@ import SwiftUI
 
 struct ReportsListView: View {
     @StateObject private var viewModel = ReportsViewModel()
+    @EnvironmentObject var subscriptionService: SubscriptionService
+    @State private var showSettings = false
+    @State private var showPaywall = false
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // Premium banner
+                if !subscriptionService.isPro {
+                    PremiumBannerView(context: .reports) {
+                        showPaywall = true
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                }
+
                 // Severity filter chips
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
@@ -86,10 +98,34 @@ struct ReportsListView: View {
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("PIREP Reports")
+            .navigationTitle("Pilot Reports")
             .searchable(text: $viewModel.searchText, prompt: "Search airport, aircraft, raw text...")
             .refreshable {
                 await viewModel.loadReports()
+            }
+            .toolbar {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    if !subscriptionService.isPro {
+                        Button { showPaywall = true } label: {
+                            Image(systemName: "crown.fill")
+                                .foregroundColor(.orange)
+                        }
+                    }
+
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+                    .environmentObject(subscriptionService)
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView(source: "reports") {
+                    showPaywall = false
+                }
+                .environmentObject(subscriptionService)
             }
             .task {
                 await viewModel.loadReports()
@@ -183,4 +219,5 @@ struct ReportsListView: View {
 
 #Preview {
     ReportsListView()
+        .environmentObject(SubscriptionService())
 }

@@ -7,14 +7,87 @@
     "— %@" : {
 
     },
-    "— %@, " : {
-
+    "— %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "— %1$@, %2$@"
+          }
+        }
+      }
     },
     "·" : {
 
     },
+    "\"%@\"" : {
+
+    },
+    "/week" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/uge"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/Woche"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/semaine"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/uke"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/semana"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/неделя"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/vecka"
+          }
+        }
+      }
+    },
     "%@" : {
 
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
     },
     "%@ → %@" : {
       "localizations" : {
@@ -215,6 +288,9 @@
         }
       }
     },
+    "3-day forecast" : {
+
+    },
     "3-day free trial, then %@/year" : {
 
     },
@@ -374,59 +450,8 @@
         }
       }
     },
-    "/week" : {
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/uge"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/Woche"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/semana"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/semaine"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/uke"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/semana"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/неделя"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/vecka"
-          }
-        }
-      }
-    },
     "14-Day" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -479,6 +504,7 @@
       }
     },
     "14-Day Guarantee" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -531,6 +557,7 @@
       }
     },
     "14-Day Money-Back Guarantee" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -898,6 +925,7 @@
       }
     },
     "After 7 Days" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -1373,6 +1401,7 @@
       }
     },
     "Anxious Flyers Worldwide" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -1688,6 +1717,7 @@
       }
     },
     "Building Your\nCalm Flight Plan" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -1898,58 +1928,6 @@
         }
       }
     },
-    "Cancel anytime" : {
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annullér når som helst"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jederzeit kündbar"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancela cuando quieras"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annulez à tout moment"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avbryt når som helst"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancele a qualquer momento"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Отмена в любое время"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avbryt när som helst"
-          }
-        }
-      }
-    },
     "Can't get off if I want to" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1999,6 +1977,59 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kan inte kliva av om jag vill"
+          }
+        }
+      }
+    },
+    "Cancel anytime" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annullér når som helst"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jederzeit kündbar"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancela cuando quieras"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulez à tout moment"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avbryt når som helst"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancele a qualquer momento"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отмена в любое время"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avbryt när som helst"
           }
         }
       }
@@ -2055,6 +2086,9 @@
           }
         }
       }
+    },
+    "Check any route and see exactly\nwhat turbulence to expect" : {
+
     },
     "Check Turbulence" : {
       "localizations" : {
@@ -2212,6 +2246,9 @@
           }
         }
       }
+    },
+    "Clear severity levels so you always\nknow what's normal and what's not" : {
+
     },
     "Commercial Pilot" : {
       "extractionState" : "stale",
@@ -2688,6 +2725,7 @@
       }
     },
     "Does turbulence make\nyour heart race?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -2846,6 +2884,7 @@
       }
     },
     "Enter your flight and see exactly\nwhen and where to expect bumps" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -2950,6 +2989,7 @@
       }
     },
     "Every Time" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -3056,9 +3096,6 @@
           }
         }
       }
-    },
-    "Feb 15 — Mar 1" : {
-
     },
     "Feeling trapped" : {
       "extractionState" : "stale",
@@ -3327,9 +3364,6 @@
         }
       }
     },
-    "Fly Calm" : {
-
-    },
     "Fly Calm, Every Time" : {
 
     },
@@ -3551,6 +3585,7 @@
       }
     },
     "From a gentle ripple to a bumpy road —\nwe explain each level in plain words" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -3759,6 +3794,7 @@
       }
     },
     "Has flight anxiety ever\nchanged your plans?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -3813,10 +3849,17 @@
     "hello@britetodo.com" : {
 
     },
+    "How do you feel\nabout flying?" : {
+
+    },
+    "How often\ndo you fly?" : {
+
+    },
     "How Your Free Trial Works" : {
 
     },
     "How Your Trial Works" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -4666,9 +4709,6 @@
         }
       }
     },
-    "JFK" : {
-
-    },
     "Know Before" : {
       "localizations" : {
         "da" : {
@@ -4722,6 +4762,7 @@
       }
     },
     "Know what turbulence to expect\nbefore you board" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -4826,9 +4867,6 @@
         }
       }
     },
-    "LHR" : {
-
-    },
     "Light" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4881,9 +4919,6 @@
           }
         }
       }
-    },
-    "Light Turbulence" : {
-
     },
     "Like cruising on a highway" : {
       "extractionState" : "stale",
@@ -4938,7 +4973,7 @@
         }
       }
     },
-    "Live" : {
+    "Live reports from pilots flying\nright now — the same data airlines use" : {
 
     },
     "Loading PIREPs..." : {
@@ -5044,9 +5079,6 @@
           }
         }
       }
-    },
-    "London" : {
-
     },
     "Losing control" : {
       "extractionState" : "stale",
@@ -5577,9 +5609,6 @@
         }
       }
     },
-    "New York" : {
-
-    },
     "No reports match your filters" : {
       "localizations" : {
         "da" : {
@@ -5790,58 +5819,6 @@
         }
       }
     },
-    "Not satisfied? Get a full refund" : {
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ikke tilfreds? Få fuld refusion"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nicht zufrieden? Volle Rückerstattung"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿No estás satisfecho? Reembolso completo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas satisfait ? Remboursement intégral"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ikke fornøyd? Full refusjon"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não está satisfeito? Reembolso total"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не довольны? Полный возврат средств"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inte nöjd? Full återbetalning"
-          }
-        }
-      }
-    },
     "Not planned yet" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5944,6 +5921,59 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inte direkt"
+          }
+        }
+      }
+    },
+    "Not satisfied? Get a full refund" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikke tilfreds? Få fuld refusion"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht zufrieden? Volle Rückerstattung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿No estás satisfecho? Reembolso completo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas satisfait ? Remboursement intégral"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikke fornøyd? Full refusjon"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não está satisfeito? Reembolso total"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не довольны? Полный возврат средств"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inte nöjd? Full återbetalning"
           }
         }
       }
@@ -6427,6 +6457,7 @@
       }
     },
     "Plan ahead — check turbulence\nup to two weeks before your flight" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -6584,6 +6615,12 @@
         }
       }
     },
+    "Powered by NOAA, FAA & Open-Meteo" : {
+
+    },
+    "Preparing Your\nForecast Engine" : {
+
+    },
     "Preparing your personal forecast…" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6689,6 +6726,9 @@
           }
         }
       }
+    },
+    "Real Pilot" : {
+
     },
     "Real-time reports from the last 6 hours along your route" : {
       "localizations" : {
@@ -6952,10 +6992,8 @@
         }
       }
     },
-    "Restore Purchases" : {
-
-    },
     "Renews weekly. Cancel anytime" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -7006,6 +7044,12 @@
           }
         }
       }
+    },
+    "Reports" : {
+
+    },
+    "Restore Purchases" : {
+
     },
     "Retry" : {
       "extractionState" : "stale",
@@ -7748,7 +7792,11 @@
         }
       }
     },
+    "Smooth Flight Expected" : {
+
+    },
     "Subscribe and unlock all forecasts" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -8701,6 +8749,9 @@
         }
       }
     },
+    "Travelers & Pilots" : {
+
+    },
     "Trusted by" : {
       "localizations" : {
         "da" : {
@@ -8858,6 +8909,9 @@
           }
         }
       }
+    },
+    "Turbulence" : {
+
     },
     "Turbulence Forecast" : {
       "localizations" : {
@@ -9019,9 +9073,6 @@
           }
         }
       }
-    },
-    "Turbulence Map" : {
-
     },
     "Understand" : {
       "localizations" : {
@@ -9289,7 +9340,11 @@
         }
       }
     },
+    "We know flying can be stressful.\nLet's take the uncertainty away." : {
+
+    },
     "We'll have your forecast ready" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -9505,7 +9560,11 @@
     "What Travelers Say" : {
 
     },
+    "What worries you\nmost about turbulence?" : {
+
+    },
     "What worries you most\nabout flying?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -9557,7 +9616,11 @@
         }
       }
     },
+    "What would\nhelp you most?" : {
+
+    },
     "What would help you\nfly calmer?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -9610,6 +9673,7 @@
       }
     },
     "When is your\nnext flight?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {

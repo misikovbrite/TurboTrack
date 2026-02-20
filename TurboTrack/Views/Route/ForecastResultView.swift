@@ -9,6 +9,7 @@ struct ForecastResultView: View {
         ScrollView {
             VStack(spacing: 14) {
                 statusBanner
+                forecastPeriodPicker
                 adviceCard
                 mapSection
 
@@ -298,6 +299,38 @@ struct ForecastResultView: View {
     }
 
     // MARK: - Disclaimer
+
+    // MARK: - Forecast Period Picker
+
+    private var forecastPeriodPicker: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Forecast Period", systemImage: "calendar.badge.clock")
+                .font(.subheadline.bold())
+                .foregroundColor(.secondary)
+
+            HStack(spacing: 8) {
+                ForEach(RouteViewModel.availableForecastDays, id: \.self) { days in
+                    Button {
+                        viewModel.forecastDays = days
+                        Task { await viewModel.searchRoute() }
+                    } label: {
+                        Text("\(days)-day")
+                            .font(.subheadline.weight(.medium))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(viewModel.forecastDays == days ? Color.blue : Color(.tertiarySystemFill))
+                            .foregroundColor(viewModel.forecastDays == days ? .white : .primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .disabled(viewModel.isLoading)
+                }
+                Spacer()
+            }
+        }
+        .padding(16)
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
 
     private var disclaimerText: some View {
         Text("This forecast is for informational purposes only. Turbulence predictions are based on atmospheric wind data and may not reflect actual conditions. Always follow crew instructions and official aviation weather briefings.")

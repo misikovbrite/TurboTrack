@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		23C8173CBA924399B88C5FC0 /* PremiumBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ABA56294901E78BA3909FC1 /* PremiumBannerView.swift */; };
+		2B089018EFA70EAA37ED9AEE /* TurbulenceFAQView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58509CAE00C9DC03C291BE79 /* TurbulenceFAQView.swift */; };
+		7F48DC289BC5260FD5F73CED /* ForecastHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC3AB0A18B57CF3CDFD7402 /* ForecastHistory.swift */; };
 		0CB22EBBF0389AC26E28998E /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C03973F87619A762AC8471D /* LocationService.swift */; };
 		1C9B4162ECA9478DFEA31C91 /* TurbulenceAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FCEAF7D6146EFB7F873758 /* TurbulenceAnnotation.swift */; };
 		2B87C3F6613676CABAD6D4FD /* Airport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0F924FEDFA69E88BDD8CF6 /* Airport.swift */; };
@@ -45,6 +48,9 @@
 /* Begin PBXFileReference section */
 		0DE721B19AFB03674B844D6B /* RouteMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteMapView.swift; sourceTree = "<group>"; };
 		1BE2166D2A638F9552565CD5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		4FC3AB0A18B57CF3CDFD7402 /* ForecastHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastHistory.swift; sourceTree = "<group>"; };
+		58509CAE00C9DC03C291BE79 /* TurbulenceFAQView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurbulenceFAQView.swift; sourceTree = "<group>"; };
+		9ABA56294901E78BA3909FC1 /* PremiumBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumBannerView.swift; sourceTree = "<group>"; };
 		29F42E136D7C5FD5BEE9306F /* ForecastResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastResultView.swift; sourceTree = "<group>"; };
 		2C297DA0115E80AC915056C3 /* SIGMET.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SIGMET.swift; sourceTree = "<group>"; };
 		2FB951EF1CE817567DAAB06F /* ReportsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsListView.swift; sourceTree = "<group>"; };
@@ -121,6 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				6F0F924FEDFA69E88BDD8CF6 /* Airport.swift */,
+				4FC3AB0A18B57CF3CDFD7402 /* ForecastHistory.swift */,
 				C2FA00FE4BCAFDEBE0C74E79 /* PIREPReport.swift */,
 				2C297DA0115E80AC915056C3 /* SIGMET.swift */,
 				D572F56CA86D87DCFEE5D91D /* TurbulenceForecast.swift */,
@@ -174,6 +181,7 @@
 		695D73FE9A0C19B92720D2EE /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				9ABA56294901E78BA3909FC1 /* PremiumBannerView.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -190,6 +198,7 @@
 		C14E2853DA33A4936EA16E8C /* Education */ = {
 			isa = PBXGroup;
 			children = (
+				58509CAE00C9DC03C291BE79 /* TurbulenceFAQView.swift */,
 			);
 			path = Education;
 			sourceTree = "<group>";
@@ -330,7 +339,9 @@
 				4FE8BA19EBBB6704DE4AB253 /* AviationWeatherService.swift in Sources */,
 				82F5CCD6341473D87411A1DF /* ContentView.swift in Sources */,
 				6A6522AF99ECE7EE8DFBD764 /* Extensions.swift in Sources */,
+				7F48DC289BC5260FD5F73CED /* ForecastHistory.swift in Sources */,
 				F82157396D6C9489173D69F5 /* ForecastResultView.swift in Sources */,
+				23C8173CBA924399B88C5FC0 /* PremiumBannerView.swift in Sources */,
 				0CB22EBBF0389AC26E28998E /* LocationService.swift in Sources */,
 				FDAE3EA0A104A9207053578C /* MapViewModel.swift in Sources */,
 				C6E114AA8741D9D37310E3F8 /* NotificationService.swift in Sources */,
@@ -352,6 +363,7 @@
 				57964A2FB261FC5C4436B212 /* TurbulenceForecast.swift in Sources */,
 				B152CC978546977ABA0EA8BE /* TurbulenceForecastService.swift in Sources */,
 				8E4AB2CC7EECFC9402B1CCA0 /* TurbulenceMapView.swift in Sources */,
+				2B089018EFA70EAA37ED9AEE /* TurbulenceFAQView.swift in Sources */,
 				D75104FA8FE0CCD5A2051249 /* TurbulenceSeverity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

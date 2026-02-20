@@ -3,7 +3,10 @@ import MapKit
 
 struct TurbulenceMapView: View {
     @StateObject private var viewModel = MapViewModel()
+    @EnvironmentObject var subscriptionService: SubscriptionService
     @State private var showFilters = false
+    @State private var showSettings = false
+    @State private var showPaywall = false
 
     var body: some View {
         NavigationStack {
@@ -46,10 +49,20 @@ struct TurbulenceMapView: View {
                     MapUserLocationButton()
                 }
 
-                // Loading overlay
-                if viewModel.isLoading {
-                    VStack {
-                        Spacer()
+                VStack {
+                    // Premium banner overlay
+                    if !subscriptionService.isPro {
+                        PremiumBannerView(context: .map) {
+                            showPaywall = true
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
+                    }
+
+                    Spacer()
+
+                    // Loading overlay
+                    if viewModel.isLoading {
                         HStack {
                             ProgressView()
                                 .tint(.white)
@@ -60,13 +73,10 @@ struct TurbulenceMapView: View {
                         .padding(8)
                         .background(.black.opacity(0.6))
                         .clipShape(Capsule())
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 8)
                     }
-                }
 
-                // Legend
-                VStack {
-                    Spacer()
+                    // Legend
                     HStack {
                         legendItem(severity: .light)
                         legendItem(severity: .moderate)
@@ -77,26 +87,35 @@ struct TurbulenceMapView: View {
                     .background(.ultraThinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .padding(.horizontal)
-                    .padding(.bottom, 60)
+                    .padding(.bottom, 8)
                 }
             }
-            .navigationTitle("TurboTrack")
+            .navigationTitle("Turbulence Map")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
                         showFilters.toggle()
                     } label: {
-                        Image(systemName: viewModel.altitudeFilterEnabled ? "slider.horizontal.3" : "slider.horizontal.3")
+                        Image(systemName: "slider.horizontal.3")
                             .foregroundColor(viewModel.altitudeFilterEnabled ? .blue : .primary)
                     }
-                }
 
-                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         Task { await viewModel.loadData() }
                     } label: {
                         Image(systemName: "arrow.clockwise")
+                    }
+
+                    if !subscriptionService.isPro {
+                        Button { showPaywall = true } label: {
+                            Image(systemName: "crown.fill")
+                                .foregroundColor(.orange)
+                        }
+                    }
+
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
                     }
                 }
             }
@@ -109,6 +128,16 @@ struct TurbulenceMapView: View {
             .sheet(isPresented: $showFilters) {
                 altitudeFilterSheet
                     .presentationDetents([.medium])
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+                    .environmentObject(subscriptionService)
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView(source: "map") {
+                    showPaywall = false
+                }
+                .environmentObject(subscriptionService)
             }
             .task {
                 await viewModel.loadData()
@@ -184,4 +213,5 @@ struct TurbulenceMapView: View {
 
 #Preview {
     TurbulenceMapView()
+        .environmentObject(SubscriptionService())
 }

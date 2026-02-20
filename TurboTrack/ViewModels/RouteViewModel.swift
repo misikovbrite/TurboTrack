@@ -21,6 +21,9 @@ class RouteViewModel: ObservableObject {
     @Published var showNotificationPrompt = false
     @Published var flightDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
     @Published var notificationScheduled = false
+    @Published var forecastDays: Int = 3
+
+    static let availableForecastDays = [3, 7, 14]
 
     // MARK: - Results
 
@@ -56,10 +59,7 @@ class RouteViewModel: ObservableObject {
     }
 
     var forecastHorizonText: String {
-        guard let forecast else { return "" }
-        let hours = forecast.forecastHorizonHours
-        if hours >= 48 { return "\(hours / 24)-day forecast" }
-        return "\(hours)h forecast"
+        return "\(forecastDays)-day forecast"
     }
 
     var forecastAdvice: (title: String, detail: String, icon: String, color: Color) {
@@ -170,18 +170,24 @@ class RouteViewModel: ObservableObject {
     func searchRoute() async {
         // Resolve airports from text if needed
         if departureAirport == nil {
+            print("[Route] Resolving departure from text: '\(departureText)'")
             departureAirport = Airport.findByQuery(departureText)
+            print("[Route] Departure resolved: \(departureAirport?.displayName ?? "nil")")
         }
         if arrivalAirport == nil {
+            print("[Route] Resolving arrival from text: '\(arrivalText)'")
             arrivalAirport = Airport.findByQuery(arrivalText)
+            print("[Route] Arrival resolved: \(arrivalAirport?.displayName ?? "nil")")
         }
 
         guard let dep = departureAirport else {
             errorMessage = "Can't find departure airport for '\(departureText)'"
+            print("[Route] ERROR: departure not found for '\(departureText)'")
             return
         }
         guard let arr = arrivalAirport else {
             errorMessage = "Can't find arrival airport for '\(arrivalText)'"
+            print("[Route] ERROR: arrival not found for '\(arrivalText)'")
             return
         }
 
@@ -197,13 +203,28 @@ class RouteViewModel: ObservableObject {
         errorMessage = nil
 
         // Fetch forecast and PIREPs concurrently
+        print("[Route] Fetching forecast: \(dep.icao) → \(arr.icao)")
         let forecastTask = Task {
-            try? await forecastService.fetchRouteForecast(
-                from: dep.coordinate, to: arr.coordinate, days: 3
-            )
+            do {
+                let result = try await forecastService.fetchRouteForecast(
+                    from: dep.coordinate, to: arr.coordinate, days: self.forecastDays
+                )
+                print("[Route] Forecast OK: \(result.layers.count) layers")
+                return result as TurbulenceForecast?
+            } catch {
+                print("[Route] Forecast ERROR: \(error)")
+                return nil as TurbulenceForecast?
+            }
         }
         let pirepsTask = Task {
-            (try? await weatherService.fetchPIREPs(hoursBack: 6)) ?? []
+            do {
+                let pireps = try await weatherService.fetchPIREPs(hoursBack: 6)
+                print("[Route] PIREPs OK: \(pireps.count) reports")
+                return pireps
+            } catch {
+                print("[Route] PIREPs ERROR: \(error)")
+                return [] as [PIREPReport]
+            }
         }
 
         forecast = await forecastTask.value
@@ -230,6 +251,13 @@ class RouteViewModel: ObservableObject {
             errorMessage = "Unable to load forecast data. Check your connection and try again."
         } else {
             showRoute = true
+            // Save to history
+            ForecastHistory.shared.addEntry(
+                departureICAO: dep.icao,
+                arrivalICAO: arr.icao,
+                forecastDays: forecastDays,
+                severity: forecastSeverity.displayName
+            )
             // Offer notification if not yet prompted for this search
             if !notificationScheduled {
                 showNotificationPrompt = true
@@ -286,6 +314,7 @@ class RouteViewModel: ObservableObject {
         arrivalSuggestions = []
         showNotificationPrompt = false
         notificationScheduled = false
+        forecastDays = 3
         flightDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
 
         cameraPosition = .userLocation(fallback: .region(
