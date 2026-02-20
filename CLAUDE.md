@@ -65,6 +65,23 @@ TurboTrack/
 
 ## Changelog
 
+### 2026-02-20 — v1.4.0 (dev)
+
+**Analysis loading screen + story results + guide sections**
+
+New files:
+- `ForecastAnalysisView.swift`: 75-second animated loading experience with dark theme, progress bar, countdown timer, sequential analysis steps (7 phases), handles app backgrounding via wall-clock timing
+- `ForecastStoryView.swift`: 4-page story-style results — flight info, turbulence severity circle, route profile with colored segments, severity-specific safety tips
+
+Changes:
+- `RouteViewModel.swift`: Added analysis state (`isAnalyzing`, `analysisPhase`, `analysisStartTime`, `dataReady`, `showStory`), `completeAnalysis()` and `showFullReport()` methods. Data fetch starts immediately, UI waits 75s before showing results.
+- `RouteInputView.swift`: Navigation chain: RouteInput → ForecastAnalysisView → ForecastStoryView → ForecastResultView
+- `ForecastResultView.swift`: Added "Understanding Turbulence Levels" guide section and severity-specific "What To Do" tips section
+- `SettingsView.swift`: Removed "Manage Subscription" button, kept "Premium Active" badge
+- `project.pbxproj`: Added ForecastAnalysisView.swift, ForecastStoryView.swift to Route group
+
+Flow: User searches route → analysis loading screen (75s with animated steps + progress bar) → story cards (4 pages, swipeable) → "View Full Report" button → full detailed report
+
 ### 2026-02-20 — v1.3.0 (build 5)
 
 **Paywall redesign: weekly-only + money-back guarantee**
