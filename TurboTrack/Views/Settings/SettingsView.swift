@@ -11,7 +11,6 @@ struct SettingsView: View {
     @StateObject private var notificationService = NotificationService.shared
     @State private var pendingCount = 0
     @State private var showPaywall = false
-    @State private var showFAQ = false
 
     var body: some View {
         NavigationStack {
@@ -96,20 +95,6 @@ struct SettingsView: View {
                             Text("5 minutes").tag(5)
                             Text("10 minutes").tag(10)
                             Text("15 minutes").tag(15)
-                        }
-                    }
-                }
-
-                Section("Learn") {
-                    Button {
-                        showFAQ = true
-                    } label: {
-                        HStack {
-                            Label("Turbulence Guide", systemImage: "book.fill")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -207,10 +192,6 @@ struct SettingsView: View {
                     showPaywall = false
                 }
                 .environmentObject(subscriptionService)
-            }
-            .sheet(isPresented: $showFAQ) {
-                TurbulenceFAQView()
-                    .presentationDetents([.large])
             }
         }
     }

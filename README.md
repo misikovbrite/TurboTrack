@@ -188,7 +188,42 @@ Select your Development Team in Signing & Capabilities, then build and run.
 
 ---
 
+## Subscription
+
+The app uses StoreKit 2 with a single weekly subscription plan:
+
+| Product ID | Price | Details |
+|------------|-------|---------|
+| `turbulence_forecast_weekly` | $2.99/week | Cancel anytime, 14-day money-back guarantee |
+
+The paywall is shown after onboarding and accessible from Settings. Free users have limited forecast access.
+
+---
+
 ## Version History
+
+### 1.3.0 (2026-02-20)
+- **Paywall redesign**: Removed yearly subscription plan, kept weekly-only ($2.99/week) centered
+- **Removed all "free trial" mentions**: Changed to just "trial" language throughout
+- **Added 14-day money-back guarantee badge** on paywall
+- **Updated paywall timeline**: New steps — Today (subscribe), Full Access, 14-Day Guarantee, After 7 Days
+- **Removed FAQ section** from Settings (TurbulenceFAQView was deleted)
+- **Cleaned up project**: Removed stale file references (ForecastHistory, PremiumBannerView, TurbulenceFAQView)
+- **Localization**: Added 9 new paywall strings across 8 locales (da, de, es, fr, nb, pt-BR, ru, sv)
+- **In-App Event**: "14-Day Turbulence Forecast" submitted with version for accelerated review
+- Version bumped to 1.3.0 build 5
+
+### 1.2.0
+- Redesigned onboarding with animated widgets
+- Added paywall integration with weekly + yearly subscription plans
+- Added subscription service with StoreKit 2 (SubscriptionService.swift)
+- Added FeatureGate for premium content gating
+
+### 1.1.0
+- Added app icon and iPad adaptation
+- Contact support (hello@britetodo.com)
+- Release configuration setup
+- Notification reminders and App Store rating request
 
 ### 1.0.0
 - Initial release
@@ -197,7 +232,6 @@ Select your Development Team in Signing & Capabilities, then build and run.
 - 13-step onboarding with feature screens and quizzes
 - Flight reminder notifications
 - Full iPhone and iPad support
-- Contact developers via email
 
 ---
 

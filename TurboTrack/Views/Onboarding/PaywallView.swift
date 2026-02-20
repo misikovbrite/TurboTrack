@@ -6,7 +6,6 @@ import FirebaseRemoteConfig
 struct PaywallView: View {
     @EnvironmentObject var subscriptionService: SubscriptionService
 
-    @State private var selectedPlanId = "turbulence_forecast_yearly"
     @State private var showCloseButton = false
     @State private var isPurchasing = false
     @State private var showError = false
@@ -67,7 +66,7 @@ struct PaywallView: View {
 
                     Spacer().frame(height: 20)
 
-                    Text("How Your Free Trial Works")
+                    Text("How Your Trial Works")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(primaryText)
 
@@ -78,14 +77,14 @@ struct PaywallView: View {
 
                     Spacer().frame(height: 20)
 
-                    planCardsSection
+                    weeklyPlanCard
                         .padding(.horizontal, 24)
 
-                    Spacer().frame(height: 10)
+                    Spacer().frame(height: 12)
 
-                    trialInfoText
+                    moneyBackBadge
 
-                    Spacer().frame(height: 10)
+                    Spacer().frame(height: 12)
 
                     subscribeButton
 
@@ -150,28 +149,28 @@ struct PaywallView: View {
             timelineStep(
                 icon: "checkmark.circle.fill",
                 title: "Today",
-                description: "Instant access to all forecasts",
+                description: "Subscribe and unlock all forecasts",
                 isFirst: true,
                 isLast: false
             )
             timelineStep(
-                icon: "lock.open.fill",
+                icon: "airplane.circle.fill",
                 title: "Full Access",
                 description: "Check any route, any time",
                 isFirst: false,
                 isLast: false
             )
             timelineStep(
-                icon: "bell.fill",
-                title: "Day 2",
-                description: "We'll remind you before trial ends",
+                icon: "shield.checkmark.fill",
+                title: "14-Day Guarantee",
+                description: "Not satisfied? Get a full refund",
                 isFirst: false,
                 isLast: false
             )
             timelineStep(
-                icon: "star.fill",
-                title: "Day 3",
-                description: "Trial ends. Cancel anytime — no charge",
+                icon: "arrow.triangle.2.circlepath",
+                title: "After 7 Days",
+                description: "Renews weekly. Cancel anytime",
                 isFirst: false,
                 isLast: true
             )
@@ -234,93 +233,52 @@ struct PaywallView: View {
             .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
     }
 
-    // MARK: - Plan Cards
+    // MARK: - Weekly Plan Card
 
-    private var planCardsSection: some View {
-        HStack(spacing: 12) {
-            planCard(
-                title: "Weekly",
-                price: subscriptionService.weeklyProduct?.displayPrice ?? "...",
-                period: "/week",
-                subtitle: nil,
-                planId: "turbulence_forecast_weekly"
-            )
+    private var weeklyPlanCard: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 0) {
+                Text(subscriptionService.weeklyProduct?.displayPrice ?? "...")
+                    .font(.system(size: 28, weight: .bold))
+                Text("/week")
+                    .font(.system(size: 16, weight: .medium))
+            }
+            .foregroundColor(primaryText)
 
-            planCard(
-                title: "Yearly",
-                price: subscriptionService.yearlyProduct?.displayPrice ?? "...",
-                period: "/year",
-                subtitle: "3-day free trial",
-                planId: "turbulence_forecast_yearly"
-            )
+            Text("Cancel anytime")
+                .font(.system(size: 14))
+                .foregroundColor(secondaryText)
         }
-        .frame(height: 90)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(accent.opacity(0.08))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(accent, lineWidth: 2)
+        )
     }
 
-    private func planCard(title: String, price: String, period: String, subtitle: String?, planId: String) -> some View {
-        let isSelected = selectedPlanId == planId
+    // MARK: - Money Back Guarantee
 
-        return Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                selectedPlanId = planId
-            }
-        } label: {
-            ZStack(alignment: .topTrailing) {
-                VStack(spacing: 5) {
-                    Text(title)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(primaryText)
+    private var moneyBackBadge: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "shield.checkmark.fill")
+                .font(.system(size: 16))
+                .foregroundColor(Color(red: 0.20, green: 0.78, blue: 0.35))
 
-                    HStack(spacing: 0) {
-                        Text(price)
-                            .font(.system(size: 15, weight: .bold))
-                        Text(period)
-                            .font(.system(size: 11, weight: .medium))
-                    }
-                    .foregroundColor(primaryText)
-
-                    if let subtitle = subtitle {
-                        Text(subtitle)
-                            .font(.system(size: 10))
-                            .foregroundColor(secondaryText)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(maxHeight: .infinity)
-
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(accent)
-                        .padding(8)
-                }
-            }
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(isSelected ? accent.opacity(0.08) : cardBg)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? accent : Color(.systemGray5), lineWidth: isSelected ? 2 : 1)
-            )
+            Text("14-Day Money-Back Guarantee")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(primaryText)
         }
-    }
-
-    // MARK: - Trial Info
-
-    private var trialInfoText: some View {
-        Group {
-            if selectedPlanId == "turbulence_forecast_yearly" {
-                let price = subscriptionService.yearlyProduct?.displayPrice ?? "..."
-                Text("3-day free trial, then \(price)/year")
-            } else {
-                let price = subscriptionService.weeklyProduct?.displayPrice ?? "..."
-                Text("\(price)/week, cancel anytime")
-            }
-        }
-        .font(.system(size: 14))
-        .foregroundColor(secondaryText)
-        .multilineTextAlignment(.center)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(red: 0.20, green: 0.78, blue: 0.35).opacity(0.1))
+        )
     }
 
     // MARK: - Subscribe Button
@@ -334,7 +292,7 @@ struct PaywallView: View {
                     ProgressView()
                         .tint(.white)
                 } else {
-                    Text(selectedPlanId == "turbulence_forecast_yearly" ? "Start Free Trial" : "Subscribe")
+                    Text("Subscribe")
                         .font(.system(size: 20, weight: .bold))
                 }
             }
@@ -528,12 +486,7 @@ struct PaywallView: View {
     // MARK: - Actions
 
     private func purchase() {
-        let product: Product?
-        if selectedPlanId == "turbulence_forecast_yearly" {
-            product = subscriptionService.yearlyProduct
-        } else {
-            product = subscriptionService.weeklyProduct
-        }
+        let product = subscriptionService.weeklyProduct
 
         guard let product = product else {
             errorMessage = "Product not available. Please try again."
