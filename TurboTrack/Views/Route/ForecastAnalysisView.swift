@@ -1,12 +1,115 @@
 import SwiftUI
+import AVFoundation
 import Combine
+
+// MARK: - Looping Video Background
+
+struct VideoBackgroundView: UIViewRepresentable {
+    let videoName: String
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.backgroundColor = .black
+
+        guard let path = Bundle.main.path(forResource: videoName, ofType: "mp4") else { return view }
+        let url = URL(fileURLWithPath: path)
+        let player = AVPlayer(url: url)
+        player.isMuted = true
+        player.actionAtItemEnd = .none
+
+        let playerLayer = AVPlayerLayer(player: player)
+        playerLayer.videoGravity = .resizeAspectFill
+        view.layer.addSublayer(playerLayer)
+
+        // Loop
+        NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: player.currentItem,
+            queue: .main
+        ) { _ in
+            player.seek(to: .zero)
+            player.play()
+        }
+
+        player.play()
+        context.coordinator.player = player
+        context.coordinator.playerLayer = playerLayer
+
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.playerLayer?.frame = uiView.bounds
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    class Coordinator {
+        var player: AVPlayer?
+        var playerLayer: AVPlayerLayer?
+    }
+}
+
+// MARK: - Animated Airplane
+
+struct FlyingAirplaneView: View {
+    @State private var flyOffset: CGFloat = -150
+    @State private var flyVertical: CGFloat = 0
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        Image(systemName: "airplane")
+            .font(.system(size: 40, weight: .light))
+            .foregroundStyle(.white)
+            .shadow(color: .white.opacity(0.4), radius: 12)
+            .rotationEffect(.degrees(rotation))
+            .offset(x: flyOffset, y: flyVertical)
+            .onAppear {
+                animateFlight()
+            }
+    }
+
+    private func animateFlight() {
+        // Fly right
+        withAnimation(.easeInOut(duration: 4)) {
+            flyOffset = 150
+            flyVertical = -20
+            rotation = -10
+        }
+
+        // Fly back left
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.2) {
+            withAnimation(.easeInOut(duration: 4)) {
+                flyOffset = -120
+                flyVertical = 15
+                rotation = -30
+            }
+        }
+
+        // Return center and repeat
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8.4) {
+            withAnimation(.easeInOut(duration: 3)) {
+                flyOffset = 0
+                flyVertical = 0
+                rotation = -15
+            }
+        }
+
+        // Loop
+        DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
+            animateFlight()
+        }
+    }
+}
+
+// MARK: - Main View
 
 struct ForecastAnalysisView: View {
     @ObservedObject var viewModel: RouteViewModel
     @State private var elapsedSeconds: Int = 0
     @State private var timer: AnyCancellable?
 
-    private let totalDuration = 75 // seconds
+    private let totalDuration = 75
     private let steps: [(icon: String, text: String, startAt: Int)] = [
         ("antenna.radiowaves.left.and.right", "Connecting to aviation data sources...", 0),
         ("airplane", "Analyzing flight route & altitude...", 10),
@@ -43,44 +146,54 @@ struct ForecastAnalysisView: View {
 
     var body: some View {
         ZStack {
-            // Dark gradient background
-            LinearGradient(
-                colors: [Color(red: 0.05, green: 0.05, blue: 0.15),
-                         Color(red: 0.08, green: 0.12, blue: 0.25)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            // Video background
+            VideoBackgroundView(videoName: "weather_bg")
+                .ignoresSafeArea()
+
+            // Dark overlay for readability
+            Color.black.opacity(0.55)
+                .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                Spacer().frame(height: 40)
+                // MARK: Top — Big message to user
+                VStack(spacing: 12) {
+                    Text("Analyzing Your Route")
+                        .font(.title.bold())
+                        .foregroundColor(.white)
 
-                // Airplane icon
-                Image(systemName: "airplane")
-                    .font(.system(size: 50))
-                    .foregroundStyle(.white)
-                    .rotationEffect(.degrees(-45))
-                    .shadow(color: .blue.opacity(0.5), radius: 20)
+                    Text("This takes about a minute.\nYou can minimize the app — we'll have\nyour report ready when you return.")
+                        .font(.body)
+                        .foregroundColor(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                }
+                .padding(.top, 32)
 
-                // Route text
+                Spacer().frame(height: 24)
+
+                // MARK: Animated airplane
+                FlyingAirplaneView()
+                    .frame(height: 80)
+
+                // Route info
                 Text(viewModel.routeTitle)
-                    .font(.title2.bold())
+                    .font(.title3.bold())
                     .foregroundColor(.white)
-                    .padding(.top, 16)
+                    .padding(.top, 8)
 
                 Text("\(viewModel.forecastDays)-day forecast")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.6))
-                    .padding(.top, 4)
+                    .padding(.top, 2)
 
-                Spacer().frame(height: 36)
+                Spacer().frame(height: 24)
 
-                // Progress bar
+                // MARK: Progress bar
                 VStack(spacing: 8) {
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 6)
-                                .fill(.white.opacity(0.1))
+                                .fill(.white.opacity(0.15))
                                 .frame(height: 8)
 
                             RoundedRectangle(cornerRadius: 6)
@@ -109,9 +222,9 @@ struct ForecastAnalysisView: View {
                 }
                 .padding(.horizontal, 32)
 
-                Spacer().frame(height: 32)
+                Spacer().frame(height: 20)
 
-                // Analysis steps
+                // MARK: Analysis steps
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                         if elapsedSeconds >= step.startAt {
@@ -142,7 +255,7 @@ struct ForecastAnalysisView: View {
                                     .font(.subheadline)
                                     .foregroundColor(isComplete ? .white.opacity(0.5) : .white)
                             }
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 6)
                             .transition(.opacity.combined(with: .move(edge: .top)))
                         }
                     }
@@ -151,21 +264,6 @@ struct ForecastAnalysisView: View {
                 .animation(.easeOut(duration: 0.4), value: currentPhase)
 
                 Spacer()
-
-                // Bottom message
-                VStack(spacing: 8) {
-                    Image(systemName: "cup.and.saucer.fill")
-                        .font(.title3)
-                        .foregroundColor(.white.opacity(0.3))
-
-                    Text("This may take a minute or two.\nFeel free to do something else — we'll have your report ready.")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.4))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(3)
-                }
-                .padding(.horizontal, 40)
-                .padding(.bottom, 40)
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -189,12 +287,10 @@ struct ForecastAnalysisView: View {
     }
 
     private func startTimer() {
-        // Calculate already elapsed time (handles backgrounding)
         if let start = viewModel.analysisStartTime {
             elapsedSeconds = Int(Date().timeIntervalSince(start))
         }
 
-        // Check if already done
         if elapsedSeconds >= totalDuration && viewModel.dataReady {
             viewModel.completeAnalysis()
             return

@@ -253,6 +253,14 @@ final class SubscriptionService: ObservableObject {
         }
     }
 
+    // MARK: - Debug
+
+    #if DEBUG
+    func debugSetPro(_ active: Bool) {
+        proState = active ? .active : .notPurchased
+    }
+    #endif
+
     // MARK: - Private Helpers
 
     private func startTransactionListener() {

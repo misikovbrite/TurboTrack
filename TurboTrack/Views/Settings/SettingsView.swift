@@ -160,6 +160,19 @@ struct SettingsView: View {
 
                 #if DEBUG
                 Section("Debug") {
+                    Button {
+                        subscriptionService.debugSetPro(true)
+                    } label: {
+                        Label("Enable Premium (Debug)", systemImage: "crown.fill")
+                            .foregroundColor(.orange)
+                    }
+
+                    Button {
+                        subscriptionService.debugSetPro(false)
+                    } label: {
+                        Label("Disable Premium (Debug)", systemImage: "crown")
+                    }
+
                     Button(role: .destructive) {
                         UserDefaults.standard.set(false, forKey: "onboarding_completed")
                     } label: {
