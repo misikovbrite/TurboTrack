@@ -23,6 +23,9 @@ struct ForecastResultView: View {
 
                 pirepSection
 
+                turbulenceGuideSection
+                whatToDoSection
+
                 if viewModel.showNotificationPrompt {
                     notificationPromptCard
                 } else if viewModel.notificationScheduled {
@@ -296,6 +299,96 @@ struct ForecastResultView: View {
         .padding(16)
         .background(.background)
         .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    // MARK: - Turbulence Guide
+
+    private var turbulenceGuideSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Understanding Turbulence Levels", systemImage: "book.fill")
+                .font(.subheadline.bold())
+                .foregroundColor(.secondary)
+
+            VStack(spacing: 10) {
+                guideRow(color: .green, level: "Smooth", description: "No significant turbulence. Drinks stay still.")
+                Divider()
+                guideRow(color: .yellow, level: "Light", description: "Minor bumps. Very common. Slight movement of items.")
+                Divider()
+                guideRow(color: .orange, level: "Moderate", description: "Noticeable jolts. Walking difficult. Objects may shift.")
+                Divider()
+                guideRow(color: .red, level: "Severe", description: "Strong forces. Stay seated with belt tight. Objects thrown.")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func guideRow(color: Color, level: String, description: String) -> some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(color)
+                .frame(width: 10, height: 10)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(level)
+                    .font(.subheadline.bold())
+                Text(description)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    // MARK: - What To Do
+
+    private var whatToDoSection: some View {
+        let tips = tipsForCurrentSeverity
+        return VStack(alignment: .leading, spacing: 12) {
+            Label("What To Do", systemImage: "lightbulb.fill")
+                .font(.subheadline.bold())
+                .foregroundColor(.secondary)
+
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(Array(tips.enumerated()), id: \.offset) { _, tip in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: tip.icon)
+                            .font(.system(size: 14))
+                            .foregroundColor(.blue)
+                            .frame(width: 20)
+
+                        Text(tip.text)
+                            .font(.subheadline)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private var tipsForCurrentSeverity: [(icon: String, text: String)] {
+        var tips: [(icon: String, text: String)] = [
+            ("lock.fill", "Keep your seatbelt fastened when seated"),
+            ("bag.fill", "Secure loose items in overhead bins or under seat"),
+            ("hand.raised.fill", "Follow crew instructions at all times"),
+        ]
+
+        switch viewModel.forecastSeverity {
+        case .moderate:
+            tips.append(("cup.and.saucer", "Avoid hot drinks during expected turbulence"))
+        case .severe, .extreme:
+            tips.append(("cup.and.saucer", "Avoid hot drinks during expected turbulence"))
+            tips.append(("figure.walk", "Return to your seat during severe turbulence"))
+            tips.append(("cross.case.fill", "Check on children and elderly passengers"))
+        default:
+            break
+        }
+
+        return tips
     }
 
     // MARK: - Disclaimer

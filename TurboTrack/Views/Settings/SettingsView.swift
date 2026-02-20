@@ -24,11 +24,6 @@ struct SettingsView: View {
                                 .foregroundColor(.green)
                             Spacer()
                         }
-                        Button {
-                            subscriptionService.manageSubscriptions()
-                        } label: {
-                            Label("Manage Subscription", systemImage: "creditcard")
-                        }
                     } else {
                         Button {
                             showPaywall = true

@@ -110,6 +110,12 @@ struct RouteInputView: View {
                     }
                 }
             }
+            .navigationDestination(isPresented: $viewModel.isAnalyzing) {
+                ForecastAnalysisView(viewModel: viewModel)
+            }
+            .navigationDestination(isPresented: $viewModel.showStory) {
+                ForecastStoryView(viewModel: viewModel)
+            }
             .navigationDestination(isPresented: $viewModel.showRoute) {
                 ForecastResultView(viewModel: viewModel)
             }

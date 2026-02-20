@@ -23,6 +23,14 @@ class RouteViewModel: ObservableObject {
     @Published var notificationScheduled = false
     @Published var forecastDays: Int = 3
 
+    // MARK: - Analysis State
+
+    @Published var isAnalyzing = false
+    @Published var analysisPhase: Int = 0
+    @Published var analysisStartTime: Date?
+    @Published var dataReady = false
+    @Published var showStory = false
+
     static let availableForecastDays = [3, 7, 14]
 
     // MARK: - Results
@@ -201,6 +209,10 @@ class RouteViewModel: ObservableObject {
         routePireps = []
         isLoading = true
         errorMessage = nil
+        dataReady = false
+        analysisPhase = 0
+        analysisStartTime = Date()
+        isAnalyzing = true
 
         // Fetch forecast and PIREPs concurrently
         print("[Route] Fetching forecast: \(dep.icao) → \(arr.icao)")
@@ -249,8 +261,8 @@ class RouteViewModel: ObservableObject {
 
         if forecast == nil && routePireps.isEmpty {
             errorMessage = "Unable to load forecast data. Check your connection and try again."
+            isAnalyzing = false
         } else {
-            showRoute = true
             // Save to history
             ForecastHistory.shared.addEntry(
                 departureICAO: dep.icao,
@@ -258,12 +270,13 @@ class RouteViewModel: ObservableObject {
                 forecastDays: forecastDays,
                 severity: forecastSeverity.displayName
             )
-            // Offer notification if not yet prompted for this search
             if !notificationScheduled {
                 showNotificationPrompt = true
             }
         }
 
+        // Data is ready — analysis view will handle timing
+        dataReady = true
         isLoading = false
     }
 
@@ -299,6 +312,18 @@ class RouteViewModel: ObservableObject {
         showNotificationPrompt = false
     }
 
+    // MARK: - Analysis
+
+    func completeAnalysis() {
+        isAnalyzing = false
+        showStory = true
+    }
+
+    func showFullReport() {
+        showStory = false
+        showRoute = true
+    }
+
     // MARK: - Clear
 
     func clearRoute() {
@@ -316,6 +341,11 @@ class RouteViewModel: ObservableObject {
         notificationScheduled = false
         forecastDays = 3
         flightDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+        isAnalyzing = false
+        analysisPhase = 0
+        analysisStartTime = nil
+        dataReady = false
+        showStory = false
 
         cameraPosition = .userLocation(fallback: .region(
             MKCoordinateRegion(
