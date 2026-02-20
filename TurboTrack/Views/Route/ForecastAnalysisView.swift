@@ -1,5 +1,5 @@
 import SwiftUI
-import AVFoundation
+import AVKit
 import Combine
 
 // MARK: - Looping Video Background
@@ -8,97 +8,70 @@ struct VideoBackgroundView: UIViewRepresentable {
     let videoName: String
 
     func makeUIView(context: Context) -> UIView {
-        let view = UIView(frame: .zero)
-        view.backgroundColor = .black
-
-        guard let path = Bundle.main.path(forResource: videoName, ofType: "mp4") else { return view }
-        let url = URL(fileURLWithPath: path)
-        let player = AVPlayer(url: url)
-        player.isMuted = true
-        player.actionAtItemEnd = .none
-
-        let playerLayer = AVPlayerLayer(player: player)
-        playerLayer.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(playerLayer)
-
-        // Loop
-        NotificationCenter.default.addObserver(
-            forName: .AVPlayerItemDidPlayToEndTime,
-            object: player.currentItem,
-            queue: .main
-        ) { _ in
-            player.seek(to: .zero)
-            player.play()
-        }
-
-        player.play()
-        context.coordinator.player = player
-        context.coordinator.playerLayer = playerLayer
-
+        let view = LoopingVideoView(videoName: videoName)
         return view
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) {
-        context.coordinator.playerLayer?.frame = uiView.bounds
+    func updateUIView(_ uiView: UIView, context: Context) {}
+}
+
+class LoopingVideoView: UIView {
+    private var player: AVQueuePlayer?
+    private var playerLayer: AVPlayerLayer?
+    private var looper: AVPlayerLooper?
+
+    init(videoName: String) {
+        super.init(frame: .zero)
+        backgroundColor = .clear
+
+        guard let url = Bundle.main.url(forResource: videoName, withExtension: "mp4") else {
+            print("[Video] Could not find \(videoName).mp4 in bundle")
+            return
+        }
+
+        let item = AVPlayerItem(url: url)
+        let queuePlayer = AVQueuePlayer(items: [item])
+        queuePlayer.isMuted = true
+
+        looper = AVPlayerLooper(player: queuePlayer, templateItem: item)
+
+        let layer = AVPlayerLayer(player: queuePlayer)
+        layer.videoGravity = .resizeAspectFill
+        self.layer.addSublayer(layer)
+
+        self.player = queuePlayer
+        self.playerLayer = layer
+
+        queuePlayer.play()
     }
 
-    func makeCoordinator() -> Coordinator { Coordinator() }
+    required init?(coder: NSCoder) { fatalError() }
 
-    class Coordinator {
-        var player: AVPlayer?
-        var playerLayer: AVPlayerLayer?
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        playerLayer?.frame = bounds
     }
 }
 
-// MARK: - Animated Airplane
+// MARK: - Animated Airplane (gentle hover)
 
 struct FlyingAirplaneView: View {
-    @State private var flyOffset: CGFloat = -150
-    @State private var flyVertical: CGFloat = 0
-    @State private var rotation: Double = 0
+    @State private var hoverY: CGFloat = 0
+    @State private var hoverRotation: Double = 0
 
     var body: some View {
         Image(systemName: "airplane")
-            .font(.system(size: 40, weight: .light))
+            .font(.system(size: 48, weight: .light))
             .foregroundStyle(.white)
-            .shadow(color: .white.opacity(0.4), radius: 12)
-            .rotationEffect(.degrees(rotation))
-            .offset(x: flyOffset, y: flyVertical)
+            .shadow(color: .white.opacity(0.5), radius: 16)
+            .rotationEffect(.degrees(-45 + hoverRotation))
+            .offset(y: hoverY)
             .onAppear {
-                animateFlight()
+                withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true)) {
+                    hoverY = -12
+                    hoverRotation = 3
+                }
             }
-    }
-
-    private func animateFlight() {
-        // Fly right
-        withAnimation(.easeInOut(duration: 4)) {
-            flyOffset = 150
-            flyVertical = -20
-            rotation = -10
-        }
-
-        // Fly back left
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4.2) {
-            withAnimation(.easeInOut(duration: 4)) {
-                flyOffset = -120
-                flyVertical = 15
-                rotation = -30
-            }
-        }
-
-        // Return center and repeat
-        DispatchQueue.main.asyncAfter(deadline: .now() + 8.4) {
-            withAnimation(.easeInOut(duration: 3)) {
-                flyOffset = 0
-                flyVertical = 0
-                rotation = -15
-            }
-        }
-
-        // Loop
-        DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
-            animateFlight()
-        }
     }
 }
 
@@ -146,40 +119,42 @@ struct ForecastAnalysisView: View {
 
     var body: some View {
         ZStack {
-            // Video background
+            // Video background with fallback
+            Color.black.ignoresSafeArea()
+
             VideoBackgroundView(videoName: "weather_bg")
                 .ignoresSafeArea()
 
-            // Dark overlay for readability
-            Color.black.opacity(0.55)
+            // Dark overlay
+            Color.black.opacity(0.5)
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // MARK: Top — Big message to user
-                VStack(spacing: 12) {
+                // MARK: Top — Prominent message
+                VStack(spacing: 14) {
                     Text("Analyzing Your Route")
-                        .font(.title.bold())
+                        .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.white)
 
-                    Text("This takes about a minute.\nYou can minimize the app — we'll have\nyour report ready when you return.")
-                        .font(.body)
-                        .foregroundColor(.white.opacity(0.85))
+                    Text("This takes about a minute.\nYou can minimize the app —\nwe'll have your report ready\nwhen you come back.")
+                        .font(.system(size: 17))
+                        .foregroundColor(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
-                        .lineSpacing(4)
+                        .lineSpacing(5)
                 }
-                .padding(.top, 32)
+                .padding(.top, 28)
 
-                Spacer().frame(height: 24)
+                Spacer().frame(height: 28)
 
-                // MARK: Animated airplane
+                // MARK: Airplane
                 FlyingAirplaneView()
-                    .frame(height: 80)
+                    .frame(height: 70)
 
-                // Route info
+                // Route
                 Text(viewModel.routeTitle)
                     .font(.title3.bold())
                     .foregroundColor(.white)
-                    .padding(.top, 8)
+                    .padding(.top, 10)
 
                 Text("\(viewModel.forecastDays)-day forecast")
                     .font(.subheadline)
@@ -224,7 +199,7 @@ struct ForecastAnalysisView: View {
 
                 Spacer().frame(height: 20)
 
-                // MARK: Analysis steps
+                // MARK: Steps
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                         if elapsedSeconds >= step.startAt {

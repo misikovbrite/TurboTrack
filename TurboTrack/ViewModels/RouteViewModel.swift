@@ -259,23 +259,19 @@ class RouteViewModel: ObservableObject {
             )
         )
 
-        if forecast == nil && routePireps.isEmpty {
-            errorMessage = "Unable to load forecast data. Check your connection and try again."
-            isAnalyzing = false
-        } else {
-            // Save to history
-            ForecastHistory.shared.addEntry(
-                departureICAO: dep.icao,
-                arrivalICAO: arr.icao,
-                forecastDays: forecastDays,
-                severity: forecastSeverity.displayName
-            )
-            if !notificationScheduled {
-                showNotificationPrompt = true
-            }
+        // Save to history even with partial data
+        ForecastHistory.shared.addEntry(
+            departureICAO: dep.icao,
+            arrivalICAO: arr.icao,
+            forecastDays: forecastDays,
+            severity: forecastSeverity.displayName
+        )
+        if !notificationScheduled {
+            showNotificationPrompt = true
         }
 
         // Data is ready — analysis view will handle timing
+        // Proceed even with partial data (forecast nil = "Smooth" severity)
         dataReady = true
         isLoading = false
     }
