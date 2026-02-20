@@ -82,7 +82,7 @@ struct ForecastStoryView: View {
                 Text(routeDisplayName)
                     .font(.title.bold())
 
-                Text("\(viewModel.departureAirport?.icao ?? "???") → \(viewModel.arrivalAirport?.icao ?? "???")")
+                Text(viewModel.routeTitle)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -175,6 +175,12 @@ struct ForecastStoryView: View {
                     Text(viewModel.departureAirport?.icao ?? "DEP")
                         .font(.caption.bold())
                     Spacer()
+                    if viewModel.isConnecting, let via = viewModel.viaAirport {
+                        Text(via.icao)
+                            .font(.caption.bold())
+                            .foregroundColor(.orange)
+                        Spacer()
+                    }
                     Text(viewModel.arrivalAirport?.icao ?? "ARR")
                         .font(.caption.bold())
                 }
@@ -290,6 +296,10 @@ struct ForecastStoryView: View {
     private var routeDisplayName: String {
         let dep = viewModel.departureAirport?.city ?? viewModel.departureAirport?.name ?? "Departure"
         let arr = viewModel.arrivalAirport?.city ?? viewModel.arrivalAirport?.name ?? "Arrival"
+        if viewModel.isConnecting, let via = viewModel.viaAirport {
+            let viaCity = via.city.isEmpty ? via.name : via.city
+            return "\(dep) → \(viaCity) → \(arr)"
+        }
         return "\(dep) → \(arr)"
     }
 

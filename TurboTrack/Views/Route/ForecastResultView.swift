@@ -4,6 +4,8 @@ import MapKit
 struct ForecastResultView: View {
     @ObservedObject var viewModel: RouteViewModel
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var showShareSheet = false
+    @State private var pdfURL: URL?
 
     var body: some View {
         ScrollView {
@@ -11,6 +13,11 @@ struct ForecastResultView: View {
                 statusBanner
                 forecastPeriodPicker
                 adviceCard
+
+                if viewModel.isConnecting {
+                    legBreakdownSection
+                }
+
                 mapSection
 
                 if !viewModel.dailyForecast.isEmpty {
@@ -32,6 +39,8 @@ struct ForecastResultView: View {
                     notificationConfirmCard
                 }
 
+                shareReportButton
+
                 disclaimerText
             }
             .frame(maxWidth: 700)
@@ -42,9 +51,20 @@ struct ForecastResultView: View {
         .navigationTitle(viewModel.routeTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    generateAndSharePDF()
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+
                 Button("New Search") { viewModel.clearRoute() }
                     .font(.subheadline)
+            }
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let url = pdfURL {
+                ShareSheet(activityItems: [url])
             }
         }
     }
@@ -92,6 +112,53 @@ struct ForecastResultView: View {
         .padding(16)
         .background(.background)
         .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    // MARK: - Leg Breakdown (connecting only)
+
+    private var legBreakdownSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Per-Leg Breakdown", systemImage: "arrow.triangle.swap")
+                .font(.subheadline.bold())
+                .foregroundColor(.secondary)
+
+            HStack(spacing: 10) {
+                legCard(title: viewModel.leg1Title, severity: viewModel.leg1Severity, label: "Leg 1")
+                legCard(title: viewModel.leg2Title, severity: viewModel.leg2Severity, label: "Leg 2")
+            }
+        }
+        .padding(16)
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func legCard(title: String, severity: TurbulenceSeverity, label: String) -> some View {
+        VStack(spacing: 8) {
+            Text(label)
+                .font(.caption.bold())
+                .foregroundColor(.secondary)
+
+            Text(title)
+                .font(.subheadline.bold())
+                .multilineTextAlignment(.center)
+
+            HStack(spacing: 4) {
+                Circle()
+                    .fill(severity.color)
+                    .frame(width: 8, height: 8)
+                Text(severity.displayName)
+                    .font(.caption.bold())
+                    .foregroundColor(severity.color)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(severity.color.opacity(0.12))
+            .clipShape(Capsule())
+        }
+        .frame(maxWidth: .infinity)
+        .padding(12)
+        .background(Color(.tertiarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: - Map
@@ -213,7 +280,8 @@ struct ForecastResultView: View {
             Text(viewModel.pirepSummary)
                 .font(.subheadline)
 
-            if !viewModel.routePireps.isEmpty {
+            let allPireps = viewModel.isConnecting ? viewModel.routePireps + viewModel.routePireps2 : viewModel.routePireps
+            if !allPireps.isEmpty {
                 Text("Real-time reports from the last 6 hours along your route")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -389,6 +457,34 @@ struct ForecastResultView: View {
         }
 
         return tips
+    }
+
+    // MARK: - Share Report
+
+    private var shareReportButton: some View {
+        Button {
+            generateAndSharePDF()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "square.and.arrow.up")
+                Text("Share Report")
+                    .fontWeight(.semibold)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+    }
+
+    private func generateAndSharePDF() {
+        let data = PDFReportGenerator.generate(from: viewModel)
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("TurbulenceReport.pdf")
+        try? data.write(to: tempURL)
+        pdfURL = tempURL
+        showShareSheet = true
     }
 
     // MARK: - Disclaimer

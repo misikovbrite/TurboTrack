@@ -40,7 +40,13 @@ struct RouteInputView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
-                        .padding(.bottom, 28)
+                        .padding(.bottom, 20)
+
+                        // Route type toggle
+                        routeTypeToggle
+                            .frame(maxWidth: 560)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 12)
 
                         // Route card (onboarding-style)
                         routeCard
@@ -136,6 +142,37 @@ struct RouteInputView: View {
         }
     }
 
+    // MARK: - Route Type Toggle
+
+    private var routeTypeToggle: some View {
+        HStack(spacing: 0) {
+            ForEach(RouteMode.allCases, id: \.self) { mode in
+                Button {
+                    if mode == .connecting && !subscriptionService.isPro {
+                        showPaywall = true
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.routeMode = mode
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: mode == .direct ? "arrow.right" : "arrow.triangle.swap")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text(mode == .direct ? "Direct" : "Connecting")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(viewModel.routeMode == mode ? Color.blue : Color.clear)
+                    .foregroundColor(viewModel.routeMode == mode ? .white : .secondary)
+                }
+            }
+        }
+        .background(Color(.tertiarySystemFill))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
     // MARK: - Route Card
 
     private var routeCard: some View {
@@ -189,6 +226,32 @@ struct RouteInputView: View {
                     .frame(height: 1)
             }
             .padding(.horizontal, 16)
+
+            // VIA field (connecting mode only)
+            if viewModel.isConnecting {
+                routeField(
+                    label: "VIA",
+                    placeholder: "Connection airport",
+                    text: $viewModel.viaText,
+                    selectedAirport: viewModel.viaAirport,
+                    suggestions: viewModel.viaSuggestions,
+                    dotColor: .orange,
+                    onClear: {
+                        viewModel.viaAirport = nil
+                        viewModel.viaText = ""
+                        viewModel.viaSuggestions = []
+                    },
+                    onSelect: { airport in
+                        viewModel.selectVia(airport)
+                    },
+                    onTextChange: {
+                        viewModel.viaAirport = nil
+                        viewModel.updateViaSuggestions()
+                    }
+                )
+
+                Divider().padding(.horizontal, 16)
+            }
 
             // Arrival
             routeField(
@@ -391,12 +454,16 @@ struct RouteInputView: View {
                     HStack(spacing: 12) {
                         VStack(spacing: 4) {
                             Circle().fill(.green).frame(width: 8, height: 8)
-                            Rectangle().fill(.secondary.opacity(0.3)).frame(width: 1.5, height: 12)
+                            Rectangle().fill(.secondary.opacity(0.3)).frame(width: 1.5, height: entry.viaICAO != nil ? 8 : 12)
+                            if entry.viaICAO != nil {
+                                Circle().fill(.orange).frame(width: 8, height: 8)
+                                Rectangle().fill(.secondary.opacity(0.3)).frame(width: 1.5, height: 8)
+                            }
                             Circle().fill(.red).frame(width: 8, height: 8)
                         }
 
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("\(entry.departureICAO) → \(entry.arrivalICAO)")
+                            Text(entry.routeDisplay)
                                 .font(.subheadline.bold())
                                 .foregroundColor(.primary)
                             Text("\(entry.forecastDays)-day · \(entry.severity) · \(entry.dateFormatted)")
@@ -431,6 +498,20 @@ struct RouteInputView: View {
         viewModel.departureAirport = Airport.find(icao: entry.departureICAO)
         viewModel.arrivalAirport = Airport.find(icao: entry.arrivalICAO)
         viewModel.forecastDays = entry.forecastDays
+
+        if let viaICAO = entry.viaICAO {
+            viewModel.routeMode = .connecting
+            viewModel.viaText = viaICAO
+            viewModel.viaAirport = Airport.find(icao: viaICAO)
+            if let via = viewModel.viaAirport {
+                viewModel.viaText = via.displayName
+            }
+        } else {
+            viewModel.routeMode = .direct
+            viewModel.viaText = ""
+            viewModel.viaAirport = nil
+        }
+
         if let dep = viewModel.departureAirport {
             viewModel.departureText = dep.displayName
         }
@@ -445,7 +526,10 @@ struct RouteInputView: View {
     }
 
     private var canSearch: Bool {
-        !viewModel.isLoading && !viewModel.departureText.isEmpty && !viewModel.arrivalText.isEmpty
+        if viewModel.isLoading { return false }
+        if viewModel.departureText.isEmpty || viewModel.arrivalText.isEmpty { return false }
+        if viewModel.isConnecting && viewModel.viaText.isEmpty { return false }
+        return true
     }
 
     private func dismissKeyboard() {

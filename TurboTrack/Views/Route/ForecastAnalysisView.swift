@@ -156,7 +156,7 @@ struct ForecastAnalysisView: View {
                     .foregroundColor(.white)
                     .padding(.top, 10)
 
-                Text("\(viewModel.forecastDays)-day forecast")
+                Text(viewModel.isConnecting ? "\(viewModel.forecastDays)-day forecast · 2 legs" : "\(viewModel.forecastDays)-day forecast")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.6))
                     .padding(.top, 2)

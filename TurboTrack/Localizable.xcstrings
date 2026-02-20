@@ -168,6 +168,9 @@
         }
       }
     },
+    "%@-day forecast" : {
+
+    },
     "%@/week, cancel anytime" : {
 
     },
@@ -1400,6 +1403,12 @@
         }
       }
     },
+    "Analyzing route..." : {
+
+    },
+    "Analyzing Your Route" : {
+
+    },
     "Anxious Flyers Worldwide" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1662,6 +1671,9 @@
           }
         }
       }
+    },
+    "Based on your forecast" : {
+
     },
     "Breathing exercises during bumps" : {
       "extractionState" : "stale",
@@ -1980,6 +1992,9 @@
           }
         }
       }
+    },
+    "Cancel" : {
+
     },
     "Cancel anytime" : {
       "extractionState" : "stale",
@@ -7157,6 +7172,12 @@
         }
       }
     },
+    "Route Profile" : {
+
+    },
+    "Safety Tips" : {
+
+    },
     "Sarah M." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7739,6 +7760,9 @@
         }
       }
     },
+    "Skip" : {
+
+    },
     "Smooth" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8219,6 +8243,9 @@
           }
         }
       }
+    },
+    "This takes about a minute.\nYou can minimize the app —\nwe'll have your report ready\nwhen you come back." : {
+
     },
     "This week" : {
       "extractionState" : "stale",
@@ -9340,6 +9367,9 @@
         }
       }
     },
+    "View Full Report" : {
+
+    },
     "We know flying can be stressful.\nLet's take the uncertainty away." : {
 
     },
@@ -10092,6 +10122,9 @@
           }
         }
       }
+    },
+    "Your Flight" : {
+
     }
   },
   "version" : "1.0"

@@ -7,6 +7,17 @@ struct ForecastHistoryEntry: Identifiable, Codable {
     let forecastDays: Int
     let severity: String
     let date: Date
+    let viaICAO: String?
+
+    init(id: UUID = UUID(), departureICAO: String, arrivalICAO: String, forecastDays: Int, severity: String, date: Date, viaICAO: String? = nil) {
+        self.id = id
+        self.departureICAO = departureICAO
+        self.arrivalICAO = arrivalICAO
+        self.forecastDays = forecastDays
+        self.severity = severity
+        self.date = date
+        self.viaICAO = viaICAO
+    }
 
     var dateFormatted: String {
         let formatter = RelativeDateTimeFormatter()
@@ -23,6 +34,13 @@ struct ForecastHistoryEntry: Identifiable, Codable {
         default: return .gray
         }
     }
+
+    var routeDisplay: String {
+        if let via = viaICAO {
+            return "\(departureICAO) → \(via) → \(arrivalICAO)"
+        }
+        return "\(departureICAO) → \(arrivalICAO)"
+    }
 }
 
 @MainActor
@@ -38,17 +56,19 @@ class ForecastHistory: ObservableObject {
         load()
     }
 
-    func addEntry(departureICAO: String, arrivalICAO: String, forecastDays: Int, severity: String) {
-        // Remove duplicate routes
-        entries.removeAll { $0.departureICAO == departureICAO && $0.arrivalICAO == arrivalICAO }
+    func addEntry(departureICAO: String, arrivalICAO: String, forecastDays: Int, severity: String, viaICAO: String? = nil) {
+        // Remove duplicate routes (same dep, arr, and via)
+        entries.removeAll {
+            $0.departureICAO == departureICAO && $0.arrivalICAO == arrivalICAO && $0.viaICAO == viaICAO
+        }
 
         let entry = ForecastHistoryEntry(
-            id: UUID(),
             departureICAO: departureICAO,
             arrivalICAO: arrivalICAO,
             forecastDays: forecastDays,
             severity: severity,
-            date: Date()
+            date: Date(),
+            viaICAO: viaICAO
         )
 
         entries.insert(entry, at: 0)

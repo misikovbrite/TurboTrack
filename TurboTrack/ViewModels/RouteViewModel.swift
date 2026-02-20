@@ -1,6 +1,10 @@
 import SwiftUI
 import MapKit
 
+enum RouteMode: String, CaseIterable {
+    case direct, connecting
+}
+
 @MainActor
 class RouteViewModel: ObservableObject {
 
@@ -12,6 +16,15 @@ class RouteViewModel: ObservableObject {
     @Published var arrivalAirport: Airport?
     @Published var departureSuggestions: [Airport] = []
     @Published var arrivalSuggestions: [Airport] = []
+
+    // MARK: - Connecting Flight
+
+    @Published var routeMode: RouteMode = .direct
+    @Published var viaText = ""
+    @Published var viaAirport: Airport?
+    @Published var viaSuggestions: [Airport] = []
+    @Published var forecast2: TurbulenceForecast?
+    @Published var routePireps2: [PIREPReport] = []
 
     // MARK: - State
 
@@ -47,23 +60,60 @@ class RouteViewModel: ObservableObject {
     private let weatherService = AviationWeatherService.shared
     private let forecastService = TurbulenceForecastService.shared
 
+    var isConnecting: Bool { routeMode == .connecting }
+
     // MARK: - Computed: Route
 
     var routePolyline: [CLLocationCoordinate2D] {
         guard let dep = departureAirport, let arr = arrivalAirport else { return [] }
+        if isConnecting, let via = viaAirport {
+            return [dep.coordinate, via.coordinate, arr.coordinate]
+        }
         return [dep.coordinate, arr.coordinate]
     }
 
     var routeTitle: String {
         let dep = departureAirport?.icao ?? "???"
         let arr = arrivalAirport?.icao ?? "???"
+        if isConnecting, let via = viaAirport {
+            return "\(dep) → \(via.icao) → \(arr)"
+        }
         return "\(dep) → \(arr)"
+    }
+
+    // MARK: - Per-leg computed
+
+    var leg1Title: String {
+        let dep = departureAirport?.icao ?? "???"
+        if isConnecting, let via = viaAirport {
+            return "\(dep) → \(via.icao)"
+        }
+        return routeTitle
+    }
+
+    var leg2Title: String {
+        guard isConnecting, let via = viaAirport else { return "" }
+        let arr = arrivalAirport?.icao ?? "???"
+        return "\(via.icao) → \(arr)"
+    }
+
+    var leg1Severity: TurbulenceSeverity {
+        forecast?.worstSeverity ?? .none
+    }
+
+    var leg2Severity: TurbulenceSeverity {
+        forecast2?.worstSeverity ?? .none
     }
 
     // MARK: - Computed: Forecast
 
     var forecastSeverity: TurbulenceSeverity {
-        forecast?.worstSeverity ?? .none
+        let s1 = forecast?.worstSeverity ?? .none
+        if isConnecting {
+            let s2 = forecast2?.worstSeverity ?? .none
+            return s1.sortOrder >= s2.sortOrder ? s1 : s2
+        }
+        return s1
     }
 
     var forecastHorizonText: String {
@@ -104,12 +154,29 @@ class RouteViewModel: ObservableObject {
     }
 
     var dailyForecast: [(date: Date, worst: TurbulenceSeverity, count: Int)] {
-        forecast?.dailySummary() ?? []
+        let leg1 = forecast?.dailySummary() ?? []
+        guard isConnecting else { return leg1 }
+        let leg2 = forecast2?.dailySummary() ?? []
+        // Merge by date, take worst per day
+        var byDate: [Date: (worst: TurbulenceSeverity, count: Int)] = [:]
+        for day in leg1 + leg2 {
+            if let existing = byDate[day.date] {
+                let worst = day.worst.sortOrder > existing.worst.sortOrder ? day.worst : existing.worst
+                byDate[day.date] = (worst, existing.count + day.count)
+            } else {
+                byDate[day.date] = (day.worst, day.count)
+            }
+        }
+        return byDate.map { (date: $0.key, worst: $0.value.worst, count: $0.value.count) }
+            .sorted { $0.date < $1.date }
     }
 
     var flightLevelBreakdown: [(level: Int, severity: TurbulenceSeverity, avgShear: Double, maxJet: Double)] {
-        guard let forecast else { return [] }
-        let allPoints = forecast.layers.flatMap(\.points)
+        var allPoints = (forecast?.layers ?? []).flatMap(\.points)
+        if isConnecting {
+            allPoints += (forecast2?.layers ?? []).flatMap(\.points)
+        }
+        guard !allPoints.isEmpty else { return [] }
         let grouped = Dictionary(grouping: allPoints, by: \.flightLevel)
         return grouped.map { level, points in
             let worst = points.map(\.severity).max { $0.sortOrder < $1.sortOrder } ?? .none
@@ -121,8 +188,10 @@ class RouteViewModel: ObservableObject {
 
     /// Aggregated forecast points for map — one per location, worst severity.
     var forecastMapPoints: [TurbulenceForecastPoint] {
-        guard let forecast else { return [] }
-        let allPoints = forecast.layers.flatMap(\.points)
+        var allPoints = (forecast?.layers ?? []).flatMap(\.points)
+        if isConnecting {
+            allPoints += (forecast2?.layers ?? []).flatMap(\.points)
+        }
         let grouped = Dictionary(grouping: allPoints) {
             "\(Int($0.latitude * 10))_\(Int($0.longitude * 10))"
         }
@@ -132,15 +201,16 @@ class RouteViewModel: ObservableObject {
     }
 
     var pirepSummary: String {
-        guard !routePireps.isEmpty else { return "No recent pilot reports along this route" }
-        let severe = routePireps.filter { $0.severity == .severe || $0.severity == .extreme }.count
-        let moderate = routePireps.filter { $0.severity == .moderate }.count
-        let light = routePireps.filter { $0.severity == .light }.count
+        let allPireps = isConnecting ? routePireps + routePireps2 : routePireps
+        guard !allPireps.isEmpty else { return "No recent pilot reports along this route" }
+        let severe = allPireps.filter { $0.severity == .severe || $0.severity == .extreme }.count
+        let moderate = allPireps.filter { $0.severity == .moderate }.count
+        let light = allPireps.filter { $0.severity == .light }.count
         var parts: [String] = []
         if severe > 0 { parts.append("\(severe) severe") }
         if moderate > 0 { parts.append("\(moderate) moderate") }
         if light > 0 { parts.append("\(light) light") }
-        return "\(routePireps.count) reports: \(parts.joined(separator: ", "))"
+        return "\(allPireps.count) reports: \(parts.joined(separator: ", "))"
     }
 
     // MARK: - Suggestions
@@ -161,6 +231,14 @@ class RouteViewModel: ObservableObject {
         arrivalSuggestions = Airport.search(arrivalText)
     }
 
+    func updateViaSuggestions() {
+        if viaAirport != nil && viaText == viaAirport?.displayName {
+            viaSuggestions = []
+            return
+        }
+        viaSuggestions = Airport.search(viaText)
+    }
+
     func selectDeparture(_ airport: Airport) {
         departureAirport = airport
         departureText = airport.displayName
@@ -171,6 +249,12 @@ class RouteViewModel: ObservableObject {
         arrivalAirport = airport
         arrivalText = airport.displayName
         arrivalSuggestions = []
+    }
+
+    func selectVia(_ airport: Airport) {
+        viaAirport = airport
+        viaText = airport.displayName
+        viaSuggestions = []
     }
 
     // MARK: - Search
@@ -187,6 +271,11 @@ class RouteViewModel: ObservableObject {
             arrivalAirport = Airport.findByQuery(arrivalText)
             print("[Route] Arrival resolved: \(arrivalAirport?.displayName ?? "nil")")
         }
+        if isConnecting && viaAirport == nil && !viaText.isEmpty {
+            print("[Route] Resolving via from text: '\(viaText)'")
+            viaAirport = Airport.findByQuery(viaText)
+            print("[Route] Via resolved: \(viaAirport?.displayName ?? "nil")")
+        }
 
         guard let dep = departureAirport else {
             errorMessage = "Can't find departure airport for '\(departureText)'"
@@ -198,15 +287,28 @@ class RouteViewModel: ObservableObject {
             print("[Route] ERROR: arrival not found for '\(arrivalText)'")
             return
         }
+        if isConnecting {
+            guard let _ = viaAirport else {
+                errorMessage = "Can't find connection airport for '\(viaText)'"
+                print("[Route] ERROR: via not found for '\(viaText)'")
+                return
+            }
+        }
 
         departureText = dep.displayName
         arrivalText = arr.displayName
         departureSuggestions = []
         arrivalSuggestions = []
+        if let via = viaAirport {
+            viaText = via.displayName
+            viaSuggestions = []
+        }
 
         // Clear previous results
         forecast = nil
+        forecast2 = nil
         routePireps = []
+        routePireps2 = []
         isLoading = true
         errorMessage = nil
         dataReady = false
@@ -214,58 +316,129 @@ class RouteViewModel: ObservableObject {
         analysisStartTime = Date()
         isAnalyzing = true
 
-        // Fetch forecast and PIREPs concurrently
-        print("[Route] Fetching forecast: \(dep.icao) → \(arr.icao)")
-        let forecastTask = Task {
-            do {
-                let result = try await forecastService.fetchRouteForecast(
-                    from: dep.coordinate, to: arr.coordinate, days: self.forecastDays
-                )
-                print("[Route] Forecast OK: \(result.layers.count) layers")
-                return result as TurbulenceForecast?
-            } catch {
-                print("[Route] Forecast ERROR: \(error)")
-                return nil as TurbulenceForecast?
+        if isConnecting, let via = viaAirport {
+            // Connecting: fetch 2 legs concurrently
+            print("[Route] Fetching connecting: \(dep.icao) → \(via.icao) → \(arr.icao)")
+            let leg1ForecastTask = Task {
+                do {
+                    let result = try await forecastService.fetchRouteForecast(
+                        from: dep.coordinate, to: via.coordinate, days: self.forecastDays
+                    )
+                    print("[Route] Leg1 forecast OK: \(result.layers.count) layers")
+                    return result as TurbulenceForecast?
+                } catch {
+                    print("[Route] Leg1 forecast ERROR: \(error)")
+                    return nil as TurbulenceForecast?
+                }
             }
-        }
-        let pirepsTask = Task {
-            do {
-                let pireps = try await weatherService.fetchPIREPs(hoursBack: 6)
-                print("[Route] PIREPs OK: \(pireps.count) reports")
-                return pireps
-            } catch {
-                print("[Route] PIREPs ERROR: \(error)")
-                return [] as [PIREPReport]
+            let leg2ForecastTask = Task {
+                do {
+                    let result = try await forecastService.fetchRouteForecast(
+                        from: via.coordinate, to: arr.coordinate, days: self.forecastDays
+                    )
+                    print("[Route] Leg2 forecast OK: \(result.layers.count) layers")
+                    return result as TurbulenceForecast?
+                } catch {
+                    print("[Route] Leg2 forecast ERROR: \(error)")
+                    return nil as TurbulenceForecast?
+                }
             }
-        }
+            let pirepsTask = Task {
+                do {
+                    let pireps = try await weatherService.fetchPIREPs(hoursBack: 6)
+                    print("[Route] PIREPs OK: \(pireps.count) reports")
+                    return pireps
+                } catch {
+                    print("[Route] PIREPs ERROR: \(error)")
+                    return [] as [PIREPReport]
+                }
+            }
 
-        forecast = await forecastTask.value
-        let allPireps = await pirepsTask.value
-        routePireps = filterPirepsAlongRoute(pireps: allPireps, from: dep.coordinate, to: arr.coordinate)
+            forecast = await leg1ForecastTask.value
+            forecast2 = await leg2ForecastTask.value
+            let allPireps = await pirepsTask.value
+            routePireps = filterPirepsAlongRoute(pireps: allPireps, from: dep.coordinate, to: via.coordinate)
+            routePireps2 = filterPirepsAlongRoute(pireps: allPireps, from: via.coordinate, to: arr.coordinate)
 
-        // Zoom to route
-        let midLat = (dep.coordinate.latitude + arr.coordinate.latitude) / 2
-        let midLon = (dep.coordinate.longitude + arr.coordinate.longitude) / 2
-        let latDelta = abs(dep.coordinate.latitude - arr.coordinate.latitude) * 1.4
-        let lonDelta = abs(dep.coordinate.longitude - arr.coordinate.longitude) * 1.4
+            // Camera bounds all 3 airports
+            let lats = [dep.coordinate.latitude, via.coordinate.latitude, arr.coordinate.latitude]
+            let lons = [dep.coordinate.longitude, via.coordinate.longitude, arr.coordinate.longitude]
+            let midLat = (lats.min()! + lats.max()!) / 2
+            let midLon = (lons.min()! + lons.max()!) / 2
+            let latDelta = (lats.max()! - lats.min()!) * 1.4
+            let lonDelta = (lons.max()! - lons.min()!) * 1.4
 
-        cameraPosition = .region(
-            MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: midLat, longitude: midLon),
-                span: MKCoordinateSpan(
-                    latitudeDelta: max(latDelta, 2),
-                    longitudeDelta: max(lonDelta, 2)
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(latitude: midLat, longitude: midLon),
+                    span: MKCoordinateSpan(
+                        latitudeDelta: max(latDelta, 2),
+                        longitudeDelta: max(lonDelta, 2)
+                    )
                 )
             )
-        )
 
-        // Save to history even with partial data
-        ForecastHistory.shared.addEntry(
-            departureICAO: dep.icao,
-            arrivalICAO: arr.icao,
-            forecastDays: forecastDays,
-            severity: forecastSeverity.displayName
-        )
+            ForecastHistory.shared.addEntry(
+                departureICAO: dep.icao,
+                arrivalICAO: arr.icao,
+                forecastDays: forecastDays,
+                severity: forecastSeverity.displayName,
+                viaICAO: via.icao
+            )
+        } else {
+            // Direct: original flow
+            print("[Route] Fetching forecast: \(dep.icao) → \(arr.icao)")
+            let forecastTask = Task {
+                do {
+                    let result = try await forecastService.fetchRouteForecast(
+                        from: dep.coordinate, to: arr.coordinate, days: self.forecastDays
+                    )
+                    print("[Route] Forecast OK: \(result.layers.count) layers")
+                    return result as TurbulenceForecast?
+                } catch {
+                    print("[Route] Forecast ERROR: \(error)")
+                    return nil as TurbulenceForecast?
+                }
+            }
+            let pirepsTask = Task {
+                do {
+                    let pireps = try await weatherService.fetchPIREPs(hoursBack: 6)
+                    print("[Route] PIREPs OK: \(pireps.count) reports")
+                    return pireps
+                } catch {
+                    print("[Route] PIREPs ERROR: \(error)")
+                    return [] as [PIREPReport]
+                }
+            }
+
+            forecast = await forecastTask.value
+            let allPireps = await pirepsTask.value
+            routePireps = filterPirepsAlongRoute(pireps: allPireps, from: dep.coordinate, to: arr.coordinate)
+
+            // Zoom to route
+            let midLat = (dep.coordinate.latitude + arr.coordinate.latitude) / 2
+            let midLon = (dep.coordinate.longitude + arr.coordinate.longitude) / 2
+            let latDelta = abs(dep.coordinate.latitude - arr.coordinate.latitude) * 1.4
+            let lonDelta = abs(dep.coordinate.longitude - arr.coordinate.longitude) * 1.4
+
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(latitude: midLat, longitude: midLon),
+                    span: MKCoordinateSpan(
+                        latitudeDelta: max(latDelta, 2),
+                        longitudeDelta: max(lonDelta, 2)
+                    )
+                )
+            )
+
+            ForecastHistory.shared.addEntry(
+                departureICAO: dep.icao,
+                arrivalICAO: arr.icao,
+                forecastDays: forecastDays,
+                severity: forecastSeverity.displayName
+            )
+        }
+
         if !notificationScheduled {
             showNotificationPrompt = true
         }
@@ -342,6 +515,14 @@ class RouteViewModel: ObservableObject {
         analysisStartTime = nil
         dataReady = false
         showStory = false
+
+        // Connecting state
+        routeMode = .direct
+        viaText = ""
+        viaAirport = nil
+        viaSuggestions = []
+        forecast2 = nil
+        routePireps2 = []
 
         cameraPosition = .userLocation(fallback: .region(
             MKCoordinateRegion(

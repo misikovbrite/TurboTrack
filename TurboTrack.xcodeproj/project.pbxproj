@@ -46,6 +46,8 @@
 		FA14B2C30002000200020001 /* ForecastStoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA14B2C30002000200020002 /* ForecastStoryView.swift */; };
 		FCE0FA6F1BEBFEB648D71281 /* SubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CFFBDF2E2B446D61A9A384 /* SubscriptionService.swift */; };
 		FDAE3EA0A104A9207053578C /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 576EF129971C2F95AA1D2EC0 /* MapViewModel.swift */; };
+		FA15B2C40001000100010001 /* PDFReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA15B2C40001000100010002 /* PDFReportGenerator.swift */; };
+		FA15B2C40002000200020001 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA15B2C40002000200020002 /* ShareSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -87,6 +89,8 @@
 		E4FCEAF7D6146EFB7F873758 /* TurbulenceAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurbulenceAnnotation.swift; sourceTree = "<group>"; };
 		F0E6CD2919FD0C54FDA0A510 /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration.storekit; sourceTree = "<group>"; };
 		F2020F40F0821736B02E8C82 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FA15B2C40001000100010002 /* PDFReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFReportGenerator.swift; sourceTree = "<group>"; };
+		FA15B2C40002000200020002 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -198,6 +202,8 @@
 			isa = PBXGroup;
 			children = (
 				96173FB47B38F365494CADE8 /* Extensions.swift */,
+				FA15B2C40001000100010002 /* PDFReportGenerator.swift */,
+				FA15B2C40002000200020002 /* ShareSheet.swift */,
 				6FE333455BE4B6308EE3EB6C /* TurbulenceSeverity.swift */,
 			);
 			path = Utils;
@@ -385,6 +391,8 @@
 				8E4AB2CC7EECFC9402B1CCA0 /* TurbulenceMapView.swift in Sources */,
 				2B089018EFA70EAA37ED9AEE /* TurbulenceFAQView.swift in Sources */,
 				D75104FA8FE0CCD5A2051249 /* TurbulenceSeverity.swift in Sources */,
+			FA15B2C40001000100010001 /* PDFReportGenerator.swift in Sources */,
+			FA15B2C40002000200020001 /* ShareSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

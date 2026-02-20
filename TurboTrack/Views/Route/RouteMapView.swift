@@ -26,6 +26,20 @@ struct RouteMapView: View {
                 }
             }
 
+            // VIA airport (connecting mode)
+            if viewModel.isConnecting, let via = viewModel.viaAirport {
+                Annotation(via.icao, coordinate: via.coordinate) {
+                    VStack(spacing: 2) {
+                        Image(systemName: "arrow.triangle.swap")
+                            .font(.title3)
+                            .foregroundColor(.orange)
+                        Text(via.icao)
+                            .font(.caption2.bold())
+                            .foregroundColor(.orange)
+                    }
+                }
+            }
+
             // Arrival airport
             if let arr = viewModel.arrivalAirport {
                 Annotation(arr.icao, coordinate: arr.coordinate) {
@@ -60,6 +74,21 @@ struct RouteMapView: View {
                         anchor: .center
                     ) {
                         TurbulenceAnnotation(severity: report.severity)
+                    }
+                }
+            }
+
+            // Leg 2 PIREPs (connecting mode)
+            if viewModel.isConnecting {
+                ForEach(viewModel.routePireps2) { report in
+                    if let coord = report.coordinate {
+                        Annotation(
+                            report.severity.displayName,
+                            coordinate: coord,
+                            anchor: .center
+                        ) {
+                            TurbulenceAnnotation(severity: report.severity)
+                        }
                     }
                 }
             }
