@@ -213,6 +213,58 @@ class RouteViewModel: ObservableObject {
         return "\(allPireps.count) reports: \(parts.joined(separator: ", "))"
     }
 
+    // MARK: - Route Profile Segments
+
+    /// Computes turbulence segments along a route between two coordinates.
+    /// Returns ~15 segments, each with a severity representing that portion of the route.
+    private func computeSegments(
+        from start: CLLocationCoordinate2D,
+        to end: CLLocationCoordinate2D,
+        using forecast: TurbulenceForecast?
+    ) -> [TurbulenceSeverity] {
+        let segmentCount = 15
+        let allPoints = (forecast?.layers ?? []).flatMap(\.points)
+        guard !allPoints.isEmpty else {
+            return Array(repeating: TurbulenceSeverity.none, count: segmentCount)
+        }
+
+        // Project each forecast point onto the route line to get a normalized position (0..1)
+        let dLat = end.latitude - start.latitude
+        let dLon = end.longitude - start.longitude
+        let routeLenSq = dLat * dLat + dLon * dLon
+        guard routeLenSq > 0 else {
+            return Array(repeating: TurbulenceSeverity.none, count: segmentCount)
+        }
+
+        // Bucket points into segments
+        var buckets: [[TurbulenceForecastPoint]] = Array(repeating: [], count: segmentCount)
+        for point in allPoints {
+            let pLat = point.latitude - start.latitude
+            let pLon = point.longitude - start.longitude
+            let t = max(0, min(1, (pLat * dLat + pLon * dLon) / routeLenSq))
+            let index = min(Int(t * Double(segmentCount)), segmentCount - 1)
+            buckets[index].append(point)
+        }
+
+        return buckets.map { points in
+            if points.isEmpty { return .none }
+            return points.map(\.severity).max { $0.sortOrder < $1.sortOrder } ?? .none
+        }
+    }
+
+    /// Turbulence profile segments for the entire route (direct) or leg 1 (connecting).
+    var leg1ProfileSegments: [TurbulenceSeverity] {
+        guard let dep = departureAirport else { return [] }
+        let endCoord = isConnecting ? (viaAirport?.coordinate ?? dep.coordinate) : (arrivalAirport?.coordinate ?? dep.coordinate)
+        return computeSegments(from: dep.coordinate, to: endCoord, using: forecast)
+    }
+
+    /// Turbulence profile segments for leg 2 (connecting only).
+    var leg2ProfileSegments: [TurbulenceSeverity] {
+        guard isConnecting, let via = viaAirport, let arr = arrivalAirport else { return [] }
+        return computeSegments(from: via.coordinate, to: arr.coordinate, using: forecast2)
+    }
+
     // MARK: - Suggestions
 
     func updateDepartureSuggestions() {

@@ -13,6 +13,7 @@ struct ForecastResultView: View {
                 statusBanner
                 forecastPeriodPicker
                 adviceCard
+                routeProfileSection
 
                 if viewModel.isConnecting {
                     legBreakdownSection
@@ -112,6 +113,137 @@ struct ForecastResultView: View {
         .padding(16)
         .background(.background)
         .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    // MARK: - Route Turbulence Profile
+
+    private var routeProfileSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Route Turbulence Profile", systemImage: "airplane")
+                .font(.subheadline.bold())
+                .foregroundColor(.secondary)
+
+            Text("Turbulence intensity along your flight path")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            if viewModel.isConnecting {
+                // Leg 1
+                VStack(spacing: 6) {
+                    HStack {
+                        Text(viewModel.departureAirport?.icao ?? "DEP")
+                            .font(.caption2.bold())
+                        Spacer()
+                        Text(viewModel.viaAirport?.icao ?? "VIA")
+                            .font(.caption2.bold())
+                            .foregroundColor(.orange)
+                    }
+                    turbulenceBar(segments: viewModel.leg1ProfileSegments)
+                    HStack {
+                        Text("Leg 1")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        severityBadge(viewModel.leg1Severity)
+                    }
+                }
+
+                Divider()
+
+                // Leg 2
+                VStack(spacing: 6) {
+                    HStack {
+                        Text(viewModel.viaAirport?.icao ?? "VIA")
+                            .font(.caption2.bold())
+                            .foregroundColor(.orange)
+                        Spacer()
+                        Text(viewModel.arrivalAirport?.icao ?? "ARR")
+                            .font(.caption2.bold())
+                    }
+                    turbulenceBar(segments: viewModel.leg2ProfileSegments)
+                    HStack {
+                        Text("Leg 2")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        severityBadge(viewModel.leg2Severity)
+                    }
+                }
+            } else {
+                // Direct flight — single bar
+                VStack(spacing: 6) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(viewModel.departureAirport?.icao ?? "DEP")
+                                .font(.caption.bold())
+                            Text(viewModel.departureAirport?.city ?? "")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(viewModel.arrivalAirport?.icao ?? "ARR")
+                                .font(.caption.bold())
+                            Text(viewModel.arrivalAirport?.city ?? "")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    turbulenceBar(segments: viewModel.leg1ProfileSegments)
+                }
+            }
+
+            // Legend
+            HStack(spacing: 14) {
+                profileLegend(color: .green, text: "Smooth")
+                profileLegend(color: .yellow, text: "Light")
+                profileLegend(color: .orange, text: "Moderate")
+                profileLegend(color: .red, text: "Severe")
+            }
+            .padding(.top, 4)
+        }
+        .padding(16)
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func turbulenceBar(segments: [TurbulenceSeverity]) -> some View {
+        HStack(spacing: 2) {
+            if segments.isEmpty {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.green.opacity(0.6))
+                    .frame(height: 32)
+            } else {
+                ForEach(Array(segments.enumerated()), id: \.offset) { _, severity in
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(severity == .none ? Color.green.opacity(0.6) : severity.color.opacity(0.85))
+                        .frame(height: 32)
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+
+    private func severityBadge(_ severity: TurbulenceSeverity) -> some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(severity.color)
+                .frame(width: 6, height: 6)
+            Text(severity.displayName)
+                .font(.caption2.bold())
+                .foregroundColor(severity.color)
+        }
+    }
+
+    private func profileLegend(color: Color, text: String) -> some View {
+        HStack(spacing: 4) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(color.opacity(0.85))
+                .frame(width: 12, height: 8)
+            Text(text)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
     }
 
     // MARK: - Leg Breakdown (connecting only)
