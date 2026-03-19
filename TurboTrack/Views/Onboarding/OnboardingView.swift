@@ -36,7 +36,7 @@ struct OnboardingView: View {
     @State private var currentSetupStepIndex: Int = -1
     @State private var showSetupStats = false
 
-    private let totalSteps = 9 // 0-8, step 8 = dark setup → paywall
+    private let totalSteps = 10 // 0-9, step 9 = dark setup → paywall
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     private var isIPad: Bool { horizontalSizeClass == .regular }
@@ -49,7 +49,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            if currentStep != 8 {
+            if currentStep != 9 {
                 ZStack {
                     LinearGradient(
                         colors: [
@@ -69,13 +69,14 @@ struct OnboardingView: View {
                 switch currentStep {
                 case 0: welcomeScreen
                 case 1: featureRouteScreen
-                case 2: featureSeverityScreen
-                case 3: featurePirepScreen
-                case 4: quiz1Screen
-                case 5: quiz2Screen
-                case 6: quiz3Screen
-                case 7: quiz4Screen
-                case 8: darkSetupScreen
+                case 2: featureFlightNumberScreen
+                case 3: featureSeverityScreen
+                case 4: featurePirepScreen
+                case 5: quiz1Screen
+                case 6: quiz2Screen
+                case 7: quiz3Screen
+                case 8: quiz4Screen
+                case 9: darkSetupScreen
                 default: EmptyView()
                 }
             }
@@ -85,9 +86,9 @@ struct OnboardingView: View {
         .onChange(of: currentStep) { _ in
             resetAnimations()
             triggerAnimations()
-            if currentStep == 2 { startSeverityAnimation() }
-            if currentStep == 3 { requestAppRating() }
-            if currentStep == 8 { startSetupAnimation() }
+            if currentStep == 3 { startSeverityAnimation() }
+            if currentStep == 4 { requestAppRating() }
+            if currentStep == 9 { startSetupAnimation() }
         }
         .onAppear {
             triggerAnimations()
@@ -296,6 +297,111 @@ struct OnboardingView: View {
         }
     }
 
+    // MARK: - Step 2: Feature — Search by Flight Number
+
+    private var featureFlightNumberScreen: some View {
+        onboardingPage {
+            VStack(spacing: 0) {
+                Spacer(minLength: 20)
+
+                // Flight number demo card
+                VStack(spacing: 16) {
+                    // Input field demo
+                    HStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 18))
+                            .foregroundColor(.blue)
+                        Text("UA 234")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Text("✓")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.green)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(12)
+
+                    // Resolved route
+                    VStack(spacing: 10) {
+                        HStack(spacing: 10) {
+                            VStack(spacing: 4) {
+                                Circle().fill(.green).frame(width: 10, height: 10)
+                                Rectangle().fill(.secondary.opacity(0.3)).frame(width: 2, height: 20)
+                                Circle().fill(.red).frame(width: 10, height: 10)
+                            }
+                            VStack(alignment: .leading, spacing: 8) {
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text("San Francisco (KSFO)")
+                                        .font(.system(size: 14, weight: .semibold))
+                                    Text("United Airlines")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                Text("New York (KEWR)")
+                                    .font(.system(size: 14, weight: .semibold))
+                            }
+                            Spacer()
+                        }
+
+                        HStack(spacing: 12) {
+                            Image(systemName: "wind")
+                                .font(.system(size: 14))
+                                .foregroundColor(.orange)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("Light Turbulence Expected")
+                                    .font(.system(size: 14, weight: .semibold))
+                                Text("FL350 — FL390")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(10)
+                        .background(Color.orange.opacity(0.1))
+                        .cornerRadius(10)
+                    }
+                }
+                .padding(20)
+                .background(Color.white)
+                .cornerRadius(20)
+                .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
+                .padding(.horizontal, 32)
+                .scaleEffect(iconScale)
+                .opacity(iconOpacity)
+
+                Spacer().frame(height: 32)
+
+                VStack(spacing: 4) {
+                    Text(LocalizedStringKey("Search by"))
+                        .font(.system(size: 36, weight: .heavy))
+                        .foregroundColor(accent)
+                    Text(LocalizedStringKey("Flight Number"))
+                        .font(.system(size: 36, weight: .heavy))
+                        .foregroundColor(darkText)
+                }
+                .opacity(titleOpacity)
+
+                Spacer().frame(height: 12)
+
+                Text(LocalizedStringKey("Just enter your flight number —\nwe'll find the route and forecast automatically"))
+                    .font(.system(size: 17))
+                    .foregroundColor(subtitleColor)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .opacity(subtitleOpacity)
+
+                Spacer(minLength: 24)
+
+                continueButton { withAnimation { currentStep = 3 } }
+                    .padding(.bottom, 50)
+            }
+            .padding(.horizontal, 24)
+        }
+    }
+
     private func routeDemoField(_ text: String) -> some View {
         HStack {
             Text(text)
@@ -309,7 +415,7 @@ struct OnboardingView: View {
         .cornerRadius(10)
     }
 
-    // MARK: - Step 2: Feature — Understand Every Bump (Fear #2: don't understand)
+    // MARK: - Step 3: Feature — Understand Every Bump (Fear #2: don't understand)
 
     private let severityLevels: [(name: String, icon: String, color: Color, desc: String)] = [
         ("Smooth", "checkmark.seal.fill", .green, "Calm skies, relax and enjoy"),
@@ -379,7 +485,7 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 24)
 
-                continueButton { withAnimation { currentStep = 3 } }
+                continueButton { withAnimation { currentStep = 4 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
@@ -396,7 +502,7 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Step 3: Feature — Real Pilot Reports (Fear #4: no control)
+    // MARK: - Step 4: Feature — Real Pilot Reports (Fear #4: no control)
 
     private var featurePirepScreen: some View {
         onboardingPage {
@@ -449,7 +555,7 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 24)
 
-                continueButton { withAnimation { currentStep = 4 } }
+                continueButton { withAnimation { currentStep = 5 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
@@ -480,7 +586,7 @@ struct OnboardingView: View {
         .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
     }
 
-    // MARK: - Step 4: Quiz 1 — How do you feel about flying?
+    // MARK: - Step 5: Quiz 1 — How do you feel about flying?
 
     private var quiz1Screen: some View {
         onboardingPage {
@@ -509,14 +615,14 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer1 == nil) { withAnimation { currentStep = 5 } }
+                continueButton(disabled: quizAnswer1 == nil) { withAnimation { currentStep = 6 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    // MARK: - Step 5: Quiz 2 — What worries you most?
+    // MARK: - Step 6: Quiz 2 — What worries you most?
 
     private var quiz2Screen: some View {
         onboardingPage {
@@ -545,14 +651,14 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer2 == nil) { withAnimation { currentStep = 6 } }
+                continueButton(disabled: quizAnswer2 == nil) { withAnimation { currentStep = 7 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    // MARK: - Step 6: Quiz 3 — How often do you fly?
+    // MARK: - Step 7: Quiz 3 — How often do you fly?
 
     private var quiz3Screen: some View {
         onboardingPage {
@@ -581,14 +687,14 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer3 == nil) { withAnimation { currentStep = 7 } }
+                continueButton(disabled: quizAnswer3 == nil) { withAnimation { currentStep = 8 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    // MARK: - Step 7: Quiz 4 — What would help you most? (multi-select)
+    // MARK: - Step 8: Quiz 4 — What would help you most? (multi-select)
 
     private let interestOptions: [(id: String, icon: String, title: String)] = [
         ("forecast", "✈️", "Route turbulence forecast"),
@@ -630,7 +736,7 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: selectedInterests.isEmpty) { withAnimation { currentStep = 8 } }
+                continueButton(disabled: selectedInterests.isEmpty) { withAnimation { currentStep = 9 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
@@ -670,7 +776,7 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Step 8: Dark Setup Screen
+    // MARK: - Step 9: Dark Setup Screen
 
     private let setupSteps = [
         "Loading atmospheric models...",
