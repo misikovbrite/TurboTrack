@@ -14,6 +14,7 @@ struct ForecastResultView: View {
                 forecastPeriodPicker
                 adviceCard
                 routeProfileSection
+                seatRecommendationSection
 
                 if viewModel.isConnecting {
                     legBreakdownSection
@@ -243,6 +244,132 @@ struct ForecastResultView: View {
             Text(text)
                 .font(.caption2)
                 .foregroundColor(.secondary)
+        }
+    }
+
+    // MARK: - Seat Recommendation
+
+    private var seatRecommendationSection: some View {
+        let rec = seatRecommendation
+        return VStack(alignment: .leading, spacing: 12) {
+            Label(LocalizedStringKey("Best Seat for This Flight"), systemImage: "seat.fill")
+                .font(.subheadline.bold())
+                .foregroundColor(.secondary)
+
+            // Plane diagram
+            VStack(spacing: 8) {
+                // Zone bar
+                GeometryReader { geo in
+                    HStack(spacing: 2) {
+                        // Nose cap
+                        ZStack {
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 4,
+                                bottomLeadingRadius: 4,
+                                bottomTrailingRadius: 0,
+                                topTrailingRadius: 0
+                            )
+                            .fill(rec.frontColor.opacity(0.25))
+                            .frame(width: geo.size.width * 0.28)
+                            Text(LocalizedStringKey("Front"))
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(rec.frontColor)
+                        }
+                        .frame(width: geo.size.width * 0.28)
+
+                        // Wing zone — best
+                        ZStack {
+                            Rectangle()
+                                .fill(rec.wingColor.opacity(rec.bestZone == .wing ? 0.35 : 0.18))
+                                .overlay(
+                                    Rectangle()
+                                        .strokeBorder(rec.wingColor, lineWidth: rec.bestZone == .wing ? 2 : 0)
+                                )
+                            VStack(spacing: 2) {
+                                if rec.bestZone == .wing {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(rec.wingColor)
+                                }
+                                Text(LocalizedStringKey("Wing"))
+                                    .font(.system(size: 11, weight: rec.bestZone == .wing ? .bold : .medium))
+                                    .foregroundColor(rec.wingColor)
+                            }
+                        }
+                        .frame(width: geo.size.width * 0.44)
+
+                        // Rear
+                        ZStack {
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 0,
+                                bottomLeadingRadius: 0,
+                                bottomTrailingRadius: 4,
+                                topTrailingRadius: 4
+                            )
+                            .fill(rec.rearColor.opacity(0.25))
+                            Text(LocalizedStringKey("Rear"))
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(rec.rearColor)
+                        }
+                        .frame(width: geo.size.width * 0.28)
+                    }
+                }
+                .frame(height: 48)
+
+                // Explanation
+                HStack(spacing: 8) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                    Text(LocalizedStringKey(rec.explanation))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private enum SeatZone { case wing, front, any }
+
+    private struct SeatRec {
+        let bestZone: SeatZone
+        let explanation: String
+        let wingColor: Color
+        let frontColor: Color
+        let rearColor: Color
+    }
+
+    private var seatRecommendation: SeatRec {
+        switch viewModel.forecastSeverity {
+        case .none, .light:
+            return SeatRec(
+                bestZone: .any,
+                explanation: "Light conditions — any seat will be comfortable",
+                wingColor: .green,
+                frontColor: .green,
+                rearColor: .green
+            )
+        case .moderate:
+            return SeatRec(
+                bestZone: .wing,
+                explanation: "Sit over the wing (middle rows) — it's the plane's center of gravity and feels the least motion",
+                wingColor: .green,
+                frontColor: .orange,
+                rearColor: .orange
+            )
+        case .severe, .extreme:
+            return SeatRec(
+                bestZone: .wing,
+                explanation: "Over the wing strongly recommended — rear seats can feel up to 2× more turbulence than the middle",
+                wingColor: .green,
+                frontColor: .red,
+                rearColor: .red
+            )
         }
     }
 

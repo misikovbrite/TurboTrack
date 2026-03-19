@@ -36,7 +36,7 @@ struct OnboardingView: View {
     @State private var currentSetupStepIndex: Int = -1
     @State private var showSetupStats = false
 
-    private let totalSteps = 10 // 0-9, step 9 = dark setup → paywall
+    private let totalSteps = 11 // 0-10, step 10 = dark setup → paywall
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     private var isIPad: Bool { horizontalSizeClass == .regular }
@@ -49,7 +49,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            if currentStep != 9 {
+            if currentStep != 10 {
                 ZStack {
                     LinearGradient(
                         colors: [
@@ -72,11 +72,12 @@ struct OnboardingView: View {
                 case 2: featureSeverityScreen
                 case 3: featurePirepScreen
                 case 4: featureFlightNumberScreen
-                case 5: quiz1Screen
-                case 6: quiz2Screen
-                case 7: quiz3Screen
-                case 8: quiz4Screen
-                case 9: darkSetupScreen
+                case 5: featureSeatScreen
+                case 6: quiz1Screen
+                case 7: quiz2Screen
+                case 8: quiz3Screen
+                case 9: quiz4Screen
+                case 10: darkSetupScreen
                 default: EmptyView()
                 }
             }
@@ -88,7 +89,7 @@ struct OnboardingView: View {
             triggerAnimations()
             if currentStep == 2 { startSeverityAnimation() }
             if currentStep == 3 { requestAppRating() }
-            if currentStep == 9 { startSetupAnimation() }
+            if currentStep == 10 { startSetupAnimation() }
         }
         .onAppear {
             triggerAnimations()
@@ -402,6 +403,150 @@ struct OnboardingView: View {
         }
     }
 
+    // MARK: - Step 5: Feature — Best Seat Recommendation
+
+    private var featureSeatScreen: some View {
+        onboardingPage {
+            VStack(spacing: 0) {
+                Spacer(minLength: 20)
+
+                // Plane seat diagram
+                VStack(spacing: 16) {
+                    // Plane silhouette top view (simplified)
+                    VStack(spacing: 6) {
+                        // Nose
+                        Capsule()
+                            .fill(Color(.systemGray5))
+                            .frame(width: 50, height: 20)
+
+                        // Fuselage with zones
+                        HStack(spacing: 2) {
+                            // Front zone
+                            VStack(spacing: 4) {
+                                Text("Front")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.orange)
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.orange.opacity(0.2))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .strokeBorder(Color.orange.opacity(0.4), lineWidth: 1)
+                                    )
+                                    .frame(width: 72, height: 70)
+                            }
+
+                            // Wing zone — highlighted
+                            VStack(spacing: 4) {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 11))
+                                        .foregroundColor(.green)
+                                    Text("Best")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(.green)
+                                }
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(Color.green.opacity(0.2))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .strokeBorder(Color.green, lineWidth: 2)
+                                        )
+                                        .frame(width: 88, height: 70)
+                                    // Wing indicators
+                                    HStack {
+                                        RoundedRectangle(cornerRadius: 3)
+                                            .fill(Color.green.opacity(0.4))
+                                            .frame(width: 18, height: 8)
+                                            .offset(x: -49)
+                                        Spacer()
+                                        RoundedRectangle(cornerRadius: 3)
+                                            .fill(Color.green.opacity(0.4))
+                                            .frame(width: 18, height: 8)
+                                            .offset(x: 49)
+                                    }
+                                    Image(systemName: "airplane")
+                                        .font(.system(size: 18))
+                                        .foregroundColor(.green.opacity(0.6))
+                                        .rotationEffect(.degrees(90))
+                                }
+                                .frame(width: 140, height: 70)
+                            }
+
+                            // Rear zone
+                            VStack(spacing: 4) {
+                                Text("Rear")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.orange)
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.orange.opacity(0.2))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .strokeBorder(Color.orange.opacity(0.4), lineWidth: 1)
+                                    )
+                                    .frame(width: 72, height: 70)
+                            }
+                        }
+
+                        // Tail
+                        Capsule()
+                            .fill(Color(.systemGray5))
+                            .frame(width: 30, height: 16)
+                    }
+                    .padding(.vertical, 8)
+
+                    // Tip card
+                    HStack(spacing: 10) {
+                        Image(systemName: "lightbulb.fill")
+                            .foregroundColor(.yellow)
+                            .font(.system(size: 18))
+                        Text("Middle rows over the wing feel up to 2× less turbulence than the rear")
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(12)
+                    .background(Color.yellow.opacity(0.08))
+                    .cornerRadius(12)
+                }
+                .padding(20)
+                .background(Color.white)
+                .cornerRadius(20)
+                .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
+                .padding(.horizontal, 32)
+                .scaleEffect(iconScale)
+                .opacity(iconOpacity)
+
+                Spacer().frame(height: 32)
+
+                VStack(spacing: 4) {
+                    Text(LocalizedStringKey("Sit Calmer,"))
+                        .font(.system(size: 36, weight: .heavy))
+                        .foregroundColor(accent)
+                    Text(LocalizedStringKey("Fly Calmer"))
+                        .font(.system(size: 36, weight: .heavy))
+                        .foregroundColor(darkText)
+                }
+                .opacity(titleOpacity)
+
+                Spacer().frame(height: 12)
+
+                Text(LocalizedStringKey("We recommend the best seat based on your route's turbulence forecast"))
+                    .font(.system(size: 17))
+                    .foregroundColor(subtitleColor)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .opacity(subtitleOpacity)
+
+                Spacer(minLength: 24)
+
+                continueButton { withAnimation { currentStep = 6 } }
+                    .padding(.bottom, 50)
+            }
+            .padding(.horizontal, 24)
+        }
+    }
+
     private func routeDemoField(_ text: String) -> some View {
         HStack {
             Text(text)
@@ -586,7 +731,7 @@ struct OnboardingView: View {
         .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
     }
 
-    // MARK: - Step 5: Quiz 1 — How do you feel about flying?
+    // MARK: - Step 6: Quiz 1 — How do you feel about flying?
 
     private var quiz1Screen: some View {
         onboardingPage {
@@ -615,14 +760,14 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer1 == nil) { withAnimation { currentStep = 6 } }
+                continueButton(disabled: quizAnswer1 == nil) { withAnimation { currentStep = 7 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    // MARK: - Step 6: Quiz 2 — What worries you most?
+    // MARK: - Step 7: Quiz 2 — What worries you most?
 
     private var quiz2Screen: some View {
         onboardingPage {
@@ -651,14 +796,14 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer2 == nil) { withAnimation { currentStep = 7 } }
+                continueButton(disabled: quizAnswer2 == nil) { withAnimation { currentStep = 8 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    // MARK: - Step 7: Quiz 3 — How often do you fly?
+    // MARK: - Step 8: Quiz 3 — How often do you fly?
 
     private var quiz3Screen: some View {
         onboardingPage {
@@ -687,14 +832,14 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: quizAnswer3 == nil) { withAnimation { currentStep = 8 } }
+                continueButton(disabled: quizAnswer3 == nil) { withAnimation { currentStep = 9 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
         }
     }
 
-    // MARK: - Step 8: Quiz 4 — What would help you most? (multi-select)
+    // MARK: - Step 9: Quiz 4 — What would help you most? (multi-select)
 
     private let interestOptions: [(id: String, icon: String, title: String)] = [
         ("forecast", "✈️", "Route turbulence forecast"),
@@ -736,7 +881,7 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 40)
 
-                continueButton(disabled: selectedInterests.isEmpty) { withAnimation { currentStep = 9 } }
+                continueButton(disabled: selectedInterests.isEmpty) { withAnimation { currentStep = 10 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
@@ -776,7 +921,7 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Step 9: Dark Setup Screen
+    // MARK: - Step 10: Dark Setup Screen
 
     private let setupSteps = [
         "Loading atmospheric models...",
