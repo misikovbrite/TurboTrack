@@ -69,9 +69,9 @@ struct OnboardingView: View {
                 switch currentStep {
                 case 0: welcomeScreen
                 case 1: featureRouteScreen
-                case 2: featureFlightNumberScreen
-                case 3: featureSeverityScreen
-                case 4: featurePirepScreen
+                case 2: featureSeverityScreen
+                case 3: featurePirepScreen
+                case 4: featureFlightNumberScreen
                 case 5: quiz1Screen
                 case 6: quiz2Screen
                 case 7: quiz3Screen
@@ -86,8 +86,8 @@ struct OnboardingView: View {
         .onChange(of: currentStep) { _ in
             resetAnimations()
             triggerAnimations()
-            if currentStep == 3 { startSeverityAnimation() }
-            if currentStep == 4 { requestAppRating() }
+            if currentStep == 2 { startSeverityAnimation() }
+            if currentStep == 3 { requestAppRating() }
             if currentStep == 9 { startSetupAnimation() }
         }
         .onAppear {
@@ -297,7 +297,7 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Step 2: Feature — Search by Flight Number
+    // MARK: - Step 4: Feature — Search by Flight Number
 
     private var featureFlightNumberScreen: some View {
         onboardingPage {
@@ -395,7 +395,7 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 24)
 
-                continueButton { withAnimation { currentStep = 3 } }
+                continueButton { withAnimation { currentStep = 5 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
@@ -415,7 +415,7 @@ struct OnboardingView: View {
         .cornerRadius(10)
     }
 
-    // MARK: - Step 3: Feature — Understand Every Bump (Fear #2: don't understand)
+    // MARK: - Step 2: Feature — Understand Every Bump (Fear #2: don't understand)
 
     private let severityLevels: [(name: String, icon: String, color: Color, desc: String)] = [
         ("Smooth", "checkmark.seal.fill", .green, "Calm skies, relax and enjoy"),
@@ -485,7 +485,7 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 24)
 
-                continueButton { withAnimation { currentStep = 4 } }
+                continueButton { withAnimation { currentStep = 3 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
@@ -502,7 +502,7 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Step 4: Feature — Real Pilot Reports (Fear #4: no control)
+    // MARK: - Step 3: Feature — Real Pilot Reports (Fear #4: no control)
 
     private var featurePirepScreen: some View {
         onboardingPage {
@@ -555,7 +555,7 @@ struct OnboardingView: View {
 
                 Spacer(minLength: 24)
 
-                continueButton { withAnimation { currentStep = 5 } }
+                continueButton { withAnimation { currentStep = 4 } }
                     .padding(.bottom, 50)
             }
             .padding(.horizontal, 24)
