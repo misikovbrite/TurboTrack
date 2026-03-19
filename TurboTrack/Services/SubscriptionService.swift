@@ -3,6 +3,13 @@ import StoreKit
 import UIKit
 import FirebaseAnalytics
 
+// MARK: - Notifications
+
+extension Notification.Name {
+    static let premiumStateDidChange = Notification.Name("premiumStateDidChange")
+    static let superProStateDidChange = Notification.Name("superProStateDidChange")
+}
+
 // MARK: - Pro State
 
 enum ProState: String, Codable {
@@ -52,9 +59,16 @@ enum PurchaseError: LocalizedError {
 @MainActor
 final class SubscriptionService: ObservableObject {
 
+    // MARK: Product IDs
+
+    static let weeklySubscription = "turbulence_forecast_weekly"
+    static let yearlySubscription = "turbulence_forecast_yearly"
+    static let superProSubscription = "turbulence_forecast_super_pro_monthly"
+
     // MARK: Published State
 
     @Published private(set) var proState: ProState = .notPurchased
+    @Published private(set) var hasSuperPro: Bool = false
     @Published private(set) var products: [Product] = []
     @Published private(set) var isLoading = false
     @Published private(set) var isPurchasing = false
@@ -66,23 +80,29 @@ final class SubscriptionService: ObservableObject {
     var isPro: Bool { proState.hasAccess }
 
     var weeklyProduct: Product? {
-        products.first { $0.id == "turbulence_forecast_weekly" }
+        products.first { $0.id == Self.weeklySubscription }
     }
 
     var yearlyProduct: Product? {
-        products.first { $0.id == "turbulence_forecast_yearly" }
+        products.first { $0.id == Self.yearlySubscription }
+    }
+
+    var superProProduct: Product? {
+        products.first { $0.id == Self.superProSubscription }
     }
 
     // MARK: Private
 
     private let productIds: Set<String> = [
-        "turbulence_forecast_weekly",
-        "turbulence_forecast_yearly"
+        weeklySubscription,
+        yearlySubscription,
+        superProSubscription
     ]
 
     private var updateListenerTask: Task<Void, Never>?
     private let cacheKey = "cached_pro_state"
     private let expirationKey = "cached_expiration_date"
+    private let superProKey = "cached_super_pro"
 
     // MARK: Init
 
@@ -93,6 +113,19 @@ final class SubscriptionService: ObservableObject {
         Task {
             await initialize()
         }
+    }
+
+    // MARK: - Upsell State
+
+    @Published var showUpsellPaywall: Bool = false
+
+    func showUpsellFlow(source: String = "banner") {
+        Analytics.logEvent("upsell_banner_clicked", parameters: ["source": source])
+        showUpsellPaywall = true
+    }
+
+    func hideUpsellPaywall() {
+        showUpsellPaywall = false
     }
 
     deinit {
@@ -144,10 +177,18 @@ final class SubscriptionService: ObservableObject {
                 await transaction.finish()
                 await refreshSubscriptionStatus()
 
-                Analytics.logEvent("purchase_completed", parameters: [
-                    "plan": product.id,
-                    "price": product.displayPrice
-                ])
+                if product.id == Self.superProSubscription {
+                    Analytics.logEvent("upsell_purchase_completed", parameters: [
+                        AnalyticsParameterItemID: product.id,
+                        AnalyticsParameterPrice: NSDecimalNumber(decimal: product.price).doubleValue,
+                        AnalyticsParameterCurrency: product.priceFormatStyle.currencyCode ?? "USD"
+                    ])
+                } else {
+                    Analytics.logEvent("purchase_completed", parameters: [
+                        "plan": product.id,
+                        "price": product.displayPrice
+                    ])
+                }
 
             case .userCancelled:
                 Analytics.logEvent("purchase_cancelled", parameters: [
@@ -208,6 +249,7 @@ final class SubscriptionService: ObservableObject {
     func refreshSubscriptionStatus() async {
         var newState = ProState.notPurchased
         var newExpirationDate: Date?
+        var newHasSuperPro = false
 
         for await result in Transaction.currentEntitlements {
             do {
@@ -217,14 +259,17 @@ final class SubscriptionService: ObservableObject {
 
                 if transaction.revocationDate != nil { continue }
 
-                if let expDate = transaction.expirationDate {
+                if let expDate = transaction.expirationDate, expDate > Date() {
+                    newState = .active
                     newExpirationDate = expDate
 
-                    if expDate > Date() {
-                        newState = .active
-                        break
-                    } else {
+                    if transaction.productID == Self.superProSubscription {
+                        newHasSuperPro = true
+                    }
+                } else if let expDate = transaction.expirationDate {
+                    if newState != .active {
                         newState = .expired
+                        newExpirationDate = expDate
                     }
                 }
             } catch {
@@ -236,6 +281,21 @@ final class SubscriptionService: ObservableObject {
             proState = newState
             expirationDate = newExpirationDate
             cacheState()
+            NotificationCenter.default.post(name: .premiumStateDidChange, object: nil)
+        }
+
+        if newHasSuperPro != hasSuperPro {
+            hasSuperPro = newHasSuperPro
+            UserDefaults.standard.set(newHasSuperPro, forKey: superProKey)
+            NotificationCenter.default.post(name: .superProStateDidChange, object: nil)
+        }
+
+        // Auto-show upsell 1.5s after first premium activation
+        if isPro && !hasSuperPro && !UserDefaults.standard.bool(forKey: "upsell_shown") {
+            UserDefaults.standard.set(true, forKey: "upsell_shown")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                self.showUpsellPaywall = true
+            }
         }
     }
 
@@ -257,7 +317,22 @@ final class SubscriptionService: ObservableObject {
 
     #if DEBUG
     func debugSetPro(_ active: Bool) {
+        let wasNotPro = !isPro
         proState = active ? .active : .notPurchased
+        cacheState()
+
+        // Auto-trigger upsell when activating premium (same as real purchase)
+        if active && wasNotPro && !hasSuperPro && !UserDefaults.standard.bool(forKey: "upsell_shown") {
+            UserDefaults.standard.set(true, forKey: "upsell_shown")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                self.showUpsellPaywall = true
+            }
+        }
+    }
+
+    func debugSetSuperPro(_ active: Bool) {
+        hasSuperPro = active
+        UserDefaults.standard.set(active, forKey: superProKey)
     }
     #endif
 
@@ -307,6 +382,8 @@ final class SubscriptionService: ObservableObject {
         if let cached = UserDefaults.standard.object(forKey: expirationKey) as? Date {
             expirationDate = cached
         }
+
+        hasSuperPro = UserDefaults.standard.bool(forKey: superProKey)
     }
 
     private func cacheState() {

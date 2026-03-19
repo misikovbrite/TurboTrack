@@ -33,6 +33,18 @@
 - **Subscription service**: `TurboTrack/Services/SubscriptionService.swift`
 - **Feature gate**: `TurboTrack/Services/FeatureGate.swift`
 
+## Super Pro Subscription
+
+- **Product ID**: `turbulence_forecast_super_pro_monthly`
+- **Subscription Group**: ОТДЕЛЬНАЯ от Premium (пользователь платит за обе)
+- **Price**: $19.99/month with 3-day free trial
+- **Flags**: `hasSuperPro` (SubscriptionService), `showUpsellPaywall`
+- **Upsell paywall**: `TurboTrack/Views/Onboarding/UpsellPaywallScreen.swift`
+- **Super Pro banner**: `TurboTrack/Views/Shared/SuperProBanner.swift`
+- **Auto-show**: 1.5s after first Premium purchase (one-time, flag `upsell_shown`)
+- **Banners**: shown on Forecast, Map, Reports when `isPro && !hasSuperPro`
+- **Settings**: "Try Super Pro" button always visible for Apple reviewers
+
 ## Locales
 
 - **App locales (9)**: en (base), da, de, es, fr, nb, pt-BR, ru, sv

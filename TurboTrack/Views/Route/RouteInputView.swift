@@ -16,8 +16,14 @@ struct RouteInputView: View {
 
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Premium banner
-                        if !subscriptionService.isPro {
+                        // Premium / Super Pro banner
+                        if subscriptionService.isPro && !subscriptionService.hasSuperPro {
+                            SuperProBanner(source: "forecast")
+                                .frame(maxWidth: 560)
+                                .padding(.horizontal, 20)
+                                .padding(.top, 12)
+                                .padding(.bottom, 8)
+                        } else if !subscriptionService.isPro {
                             PremiumBannerView(context: .forecast) {
                                 showPaywall = true
                             }
@@ -42,16 +48,29 @@ struct RouteInputView: View {
                         }
                         .padding(.bottom, 20)
 
-                        // Route type toggle
-                        routeTypeToggle
+                        // Search mode toggle: Route / Flight №
+                        searchModeToggle
                             .frame(maxWidth: 560)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 12)
 
-                        // Route card (onboarding-style)
-                        routeCard
-                            .frame(maxWidth: 560)
-                            .padding(.horizontal, 20)
+                        if viewModel.searchMode == .route {
+                            // Route type toggle
+                            routeTypeToggle
+                                .frame(maxWidth: 560)
+                                .padding(.horizontal, 20)
+                                .padding(.bottom, 12)
+
+                            // Route card (onboarding-style)
+                            routeCard
+                                .frame(maxWidth: 560)
+                                .padding(.horizontal, 20)
+                        } else {
+                            // Flight number card
+                            flightNumberCard
+                                .frame(maxWidth: 560)
+                                .padding(.horizontal, 20)
+                        }
 
                         // Forecast period
                         forecastPeriodSection
@@ -140,6 +159,104 @@ struct RouteInputView: View {
                     .environmentObject(subscriptionService)
             }
         }
+    }
+
+    // MARK: - Search Mode Toggle
+
+    private var searchModeToggle: some View {
+        HStack(spacing: 0) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.searchMode = .route
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "map")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Route")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(viewModel.searchMode == .route ? Color.blue : Color.clear)
+                .foregroundColor(viewModel.searchMode == .route ? .white : .secondary)
+            }
+
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.searchMode = .flightNumber
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "number")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Flight №")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(viewModel.searchMode == .flightNumber ? Color.blue : Color.clear)
+                .foregroundColor(viewModel.searchMode == .flightNumber ? .white : .secondary)
+            }
+        }
+        .background(Color(.tertiarySystemFill))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    // MARK: - Flight Number Card
+
+    private var flightNumberCard: some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 12) {
+                Image(systemName: "airplane.departure")
+                    .font(.system(size: 20))
+                    .foregroundColor(.blue)
+                    .frame(width: 32)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("FLIGHT NUMBER")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.secondary)
+                        .tracking(1)
+
+                    TextField("e.g. UA123, BA456", text: $viewModel.flightNumberText)
+                        .font(.system(size: 20, weight: .semibold))
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.characters)
+                }
+
+                Spacer()
+
+                if !viewModel.flightNumberText.isEmpty {
+                    Button {
+                        viewModel.flightNumberText = ""
+                        viewModel.resolvedFlightInfo = nil
+                        viewModel.errorMessage = nil
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(Color(.systemGray3))
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+
+            if let info = viewModel.resolvedFlightInfo {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                    Text(info)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.primary)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
+            }
+        }
+        .background(.background)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.08), radius: 16, y: 8)
     }
 
     // MARK: - Route Type Toggle
@@ -413,7 +530,11 @@ struct RouteInputView: View {
         Button {
             dismissKeyboard()
             if subscriptionService.isPro {
-                Task { await viewModel.searchRoute() }
+                if viewModel.searchMode == .flightNumber {
+                    Task { await viewModel.searchByFlightNumber() }
+                } else {
+                    Task { await viewModel.searchRoute() }
+                }
             } else {
                 showPaywall = true
             }
@@ -527,6 +648,9 @@ struct RouteInputView: View {
 
     private var canSearch: Bool {
         if viewModel.isLoading { return false }
+        if viewModel.searchMode == .flightNumber {
+            return !viewModel.flightNumberText.trimmingCharacters(in: .whitespaces).isEmpty
+        }
         if viewModel.departureText.isEmpty || viewModel.arrivalText.isEmpty { return false }
         if viewModel.isConnecting && viewModel.viaText.isEmpty { return false }
         return true

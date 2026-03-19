@@ -7,11 +7,13 @@ struct SettingsView: View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled = false
     @AppStorage("notifyHoursBefore") private var notifyHoursBefore = 24
 
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var subscriptionService: SubscriptionService
     @StateObject private var notificationService = NotificationService.shared
     @State private var pendingCount = 0
     @State private var showPaywall = false
     @State private var showFAQ = false
+    @State private var showUpsell = false
 
     var body: some View {
         NavigationStack {
@@ -144,6 +146,38 @@ struct SettingsView: View {
                     .padding(.vertical, 2)
                 }
 
+                // Super Pro upsell — always visible so reviewers can find it
+                if !subscriptionService.hasSuperPro {
+                    Section {
+                        Button {
+                            showUpsell = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "shield.checkered")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.blue)
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Try Super Pro")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.blue)
+                                    Text("10× accuracy · 14-day forecasts · Priority alerts")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    } header: {
+                        Text("Super Pro")
+                    }
+                }
+
                 Section("Support") {
                     Button {
                         openMail()
@@ -168,9 +202,31 @@ struct SettingsView: View {
                     }
 
                     Button {
-                        subscriptionService.debugSetPro(false)
+                        // Simulate premium purchase → close settings → show Super Pro upsell
+                        subscriptionService.debugSetPro(true)
+                        UserDefaults.standard.set(false, forKey: "upsell_shown")
+                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            subscriptionService.showUpsellPaywall = true
+                        }
                     } label: {
-                        Label("Disable Premium (Debug)", systemImage: "crown")
+                        Label("Simulate Premium → Show Super Pro", systemImage: "diamond.fill")
+                            .foregroundColor(.blue)
+                    }
+
+                    Button {
+                        subscriptionService.debugSetSuperPro(true)
+                    } label: {
+                        Label("Enable Super Pro (Debug)", systemImage: "shield.checkered")
+                            .foregroundColor(.purple)
+                    }
+
+                    Button {
+                        subscriptionService.debugSetPro(false)
+                        subscriptionService.debugSetSuperPro(false)
+                        UserDefaults.standard.set(false, forKey: "upsell_shown")
+                    } label: {
+                        Label("Reset All Subscriptions", systemImage: "arrow.counterclockwise")
                     }
 
                     Button(role: .destructive) {
@@ -219,6 +275,13 @@ struct SettingsView: View {
             .sheet(isPresented: $showFAQ) {
                 TurbulenceFAQView()
                     .presentationDetents([.large])
+            }
+            .fullScreenCover(isPresented: $showUpsell) {
+                UpsellPaywallScreen(
+                    onClose: { showUpsell = false },
+                    onSubscribe: { showUpsell = false }
+                )
+                .environmentObject(subscriptionService)
             }
         }
     }

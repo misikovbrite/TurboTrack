@@ -5,6 +5,10 @@ enum RouteMode: String, CaseIterable {
     case direct, connecting
 }
 
+enum SearchMode: String, CaseIterable {
+    case route, flightNumber
+}
+
 @MainActor
 class RouteViewModel: ObservableObject {
 
@@ -16,6 +20,13 @@ class RouteViewModel: ObservableObject {
     @Published var arrivalAirport: Airport?
     @Published var departureSuggestions: [Airport] = []
     @Published var arrivalSuggestions: [Airport] = []
+
+    // MARK: - Search Mode
+
+    @Published var searchMode: SearchMode = .route
+    @Published var flightNumberText = ""
+    @Published var resolvedFlightInfo: String?
+    private let flightNumberService = FlightNumberService.shared
 
     // MARK: - Connecting Flight
 
@@ -309,6 +320,56 @@ class RouteViewModel: ObservableObject {
         viaSuggestions = []
     }
 
+    // MARK: - Flight Number Lookup
+
+    func searchByFlightNumber() async {
+        let number = flightNumberText.trimmingCharacters(in: .whitespaces)
+        guard !number.isEmpty else {
+            errorMessage = "Enter a flight number (e.g. UA123)"
+            return
+        }
+
+        isLoading = true
+        errorMessage = nil
+        resolvedFlightInfo = nil
+
+        guard let route = await flightNumberService.lookupFlight(number) else {
+            errorMessage = flightNumberService.errorMessage ?? "Flight not found"
+            isLoading = false
+            return
+        }
+
+        // Resolve ICAO codes to Airport objects
+        let dep = Airport.find(icao: route.departureICAO)
+        let arr = Airport.find(icao: route.arrivalICAO)
+
+        guard let depAirport = dep else {
+            errorMessage = "Departure airport \(route.departureICAO) not in database"
+            isLoading = false
+            return
+        }
+        guard let arrAirport = arr else {
+            errorMessage = "Arrival airport \(route.arrivalICAO) not in database"
+            isLoading = false
+            return
+        }
+
+        // Fill in route fields
+        departureAirport = depAirport
+        arrivalAirport = arrAirport
+        departureText = depAirport.displayName
+        arrivalText = arrAirport.displayName
+        routeMode = .direct
+
+        let airlineInfo = route.airline.isEmpty ? "" : " (\(route.airline))"
+        resolvedFlightInfo = "\(number.uppercased())\(airlineInfo): \(route.departureCity) → \(route.arrivalCity)"
+
+        isLoading = false
+
+        // Now run the regular search
+        await searchRoute()
+    }
+
     // MARK: - Search
 
     func searchRoute() async {
@@ -567,6 +628,10 @@ class RouteViewModel: ObservableObject {
         analysisStartTime = nil
         dataReady = false
         showStory = false
+
+        // Flight number
+        flightNumberText = ""
+        resolvedFlightInfo = nil
 
         // Connecting state
         routeMode = .direct

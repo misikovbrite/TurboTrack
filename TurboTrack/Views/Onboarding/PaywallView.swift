@@ -109,6 +109,20 @@ struct PaywallView: View {
 
                     termsSection
 
+                    #if DEBUG
+                    Spacer().frame(height: 20)
+                    Button {
+                        subscriptionService.debugSetPro(true)
+                    } label: {
+                        Text("Debug: Simulate Purchase")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                            .padding(8)
+                            .background(Color.orange.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    #endif
+
                     Spacer().frame(height: 40)
                 }
                 .frame(maxWidth: isIPad ? 700 : .infinity)
@@ -373,6 +387,7 @@ struct PaywallView: View {
 
             VStack(spacing: 20) {
                 featureRow(icon: "paperplane.fill", title: "Route Turbulence Forecast", description: "Check any route from departure to arrival", highlighted: true)
+                featureRow(icon: "number", title: "Search by Flight Number", description: "Enter UA123 or BA456 — get instant turbulence forecast", highlighted: true)
                 featureRow(icon: "calendar.badge.clock", title: "Up to 14-Day Forecasts", description: "Choose 3, 7, or 14-day turbulence predictions")
                 featureRow(icon: "airplane.circle.fill", title: "Live Pilot Reports", description: "Real-time PIREPs from pilots around the world")
                 featureRow(icon: "chart.bar.fill", title: "Flight Level Breakdown", description: "Detailed analysis at every altitude from FL100 to FL390")

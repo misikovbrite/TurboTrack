@@ -9,8 +9,12 @@ struct ReportsListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Premium banner
-                if !subscriptionService.isPro {
+                // Premium / Super Pro banner
+                if subscriptionService.isPro && !subscriptionService.hasSuperPro {
+                    SuperProBanner(source: "reports")
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                } else if !subscriptionService.isPro {
                     PremiumBannerView(context: .reports) {
                         showPaywall = true
                     }

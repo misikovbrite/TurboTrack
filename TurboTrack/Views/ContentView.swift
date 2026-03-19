@@ -29,23 +29,40 @@ struct ContentView: View {
             }
             .environmentObject(subscriptionService)
         } else {
-            TabView {
-                TurbulenceMapView()
-                    .tabItem {
-                        Label("Map", systemImage: "map.fill")
-                    }
+            ZStack {
+                TabView {
+                    TurbulenceMapView()
+                        .tabItem {
+                            Label("Map", systemImage: "map.fill")
+                        }
 
-                RouteInputView()
-                    .tabItem {
-                        Label("Forecast", systemImage: "airplane")
-                    }
+                    RouteInputView()
+                        .tabItem {
+                            Label("Forecast", systemImage: "airplane")
+                        }
 
-                ReportsListView()
-                    .tabItem {
-                        Label("Reports", systemImage: "list.bullet.rectangle")
-                    }
+                    ReportsListView()
+                        .tabItem {
+                            Label("Reports", systemImage: "list.bullet.rectangle")
+                        }
+                }
+                .tint(.blue)
+
+                // Upsell Paywall Overlay (Super Pro) — above regular paywall
+                if subscriptionService.showUpsellPaywall {
+                    UpsellPaywallScreen(
+                        onClose: {
+                            subscriptionService.hideUpsellPaywall()
+                        },
+                        onSubscribe: {
+                            subscriptionService.hideUpsellPaywall()
+                        }
+                    )
+                    .environmentObject(subscriptionService)
+                    .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+                    .zIndex(1001)
+                }
             }
-            .tint(.blue)
         }
     }
 }

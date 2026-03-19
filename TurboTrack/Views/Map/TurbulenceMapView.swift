@@ -50,8 +50,12 @@ struct TurbulenceMapView: View {
                 }
 
                 VStack {
-                    // Premium banner overlay
-                    if !subscriptionService.isPro {
+                    // Premium / Super Pro banner overlay
+                    if subscriptionService.isPro && !subscriptionService.hasSuperPro {
+                        SuperProBanner(source: "map")
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                    } else if !subscriptionService.isPro {
                         PremiumBannerView(context: .map) {
                             showPaywall = true
                         }
