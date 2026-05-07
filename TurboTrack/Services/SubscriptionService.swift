@@ -64,6 +64,8 @@ final class SubscriptionService: ObservableObject {
     static let weeklySubscription = "turbulence_forecast_weekly"
     static let yearlySubscription = "turbulence_forecast_yearly"
     static let superProSubscription = "turbulence_forecast_super_pro_monthly"
+    static let weeklyTrialSubscription = "weekly_trial"
+    static let yearlyNoTrialSubscription = "yearly_no_trial"
 
     // MARK: Published State
 
@@ -91,12 +93,22 @@ final class SubscriptionService: ObservableObject {
         products.first { $0.id == Self.superProSubscription }
     }
 
+    var weeklyTrialProduct: Product? {
+        products.first { $0.id == Self.weeklyTrialSubscription }
+    }
+
+    var yearlyNoTrialProduct: Product? {
+        products.first { $0.id == Self.yearlyNoTrialSubscription }
+    }
+
     // MARK: Private
 
     private let productIds: Set<String> = [
         weeklySubscription,
         yearlySubscription,
-        superProSubscription
+        superProSubscription,
+        weeklyTrialSubscription,
+        yearlyNoTrialSubscription
     ]
 
     private var updateListenerTask: Task<Void, Never>?

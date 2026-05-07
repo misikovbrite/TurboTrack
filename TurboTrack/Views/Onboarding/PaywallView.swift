@@ -6,16 +6,18 @@ import FirebaseRemoteConfig
 struct PaywallView: View {
     @EnvironmentObject var subscriptionService: SubscriptionService
 
-    @State private var selectedPlanId = "turbulence_forecast_yearly"
+    @State private var selectedPlanId = "turbulence_forecast_weekly"
     @State private var showCloseButton = false
     @State private var isPurchasing = false
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var showRestoreAlert = false
     @State private var restoreSuccess = false
+    @State private var paywallVariant = "A"
 
     let source: String
     let onComplete: () -> Void
+    var debugVariant: String? = nil
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     private var isIPad: Bool { horizontalSizeClass == .regular }
@@ -45,7 +47,10 @@ struct PaywallView: View {
 
                         if showCloseButton {
                             Button {
-                                Analytics.logEvent("paywall_dismissed", parameters: ["source": source])
+                                Analytics.logEvent("paywall_dismissed", parameters: [
+                                    "source": source,
+                                    "variant": paywallVariant
+                                ])
                                 onComplete()
                             } label: {
                                 Image(systemName: "xmark")
@@ -130,11 +135,33 @@ struct PaywallView: View {
             }
         }
         .onAppear {
-            Analytics.logEvent("paywall_shown", parameters: ["source": source])
-
             let remoteConfig = RemoteConfig.remoteConfig()
-            let delay = remoteConfig.configValue(forKey: "turbulence_close_button_delay").numberValue.doubleValue
+            if let forced = debugVariant {
+                if forced == "B" {
+                    paywallVariant = "B"
+                    selectedPlanId = SubscriptionService.weeklyTrialSubscription
+                } else {
+                    paywallVariant = "A"
+                    selectedPlanId = SubscriptionService.weeklySubscription
+                }
+                Analytics.logEvent("paywall_shown", parameters: ["source": source, "variant": paywallVariant])
+            } else {
+                remoteConfig.fetchAndActivate { _, _ in
+                    DispatchQueue.main.async {
+                        let variant = remoteConfig.configValue(forKey: "paywall_variant").stringValue
+                        if variant == "B" {
+                            self.paywallVariant = "B"
+                            self.selectedPlanId = SubscriptionService.weeklyTrialSubscription
+                        }
+                        Analytics.logEvent("paywall_shown", parameters: [
+                            "source": self.source,
+                            "variant": self.paywallVariant
+                        ])
+                    }
+                }
+            }
 
+            let delay = remoteConfig.configValue(forKey: "turbulence_close_button_delay").numberValue.doubleValue
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 withAnimation(.easeIn(duration: 0.3)) {
                     showCloseButton = true
@@ -252,21 +279,37 @@ struct PaywallView: View {
 
     private var planCardsSection: some View {
         HStack(spacing: 12) {
-            planCard(
-                title: "Weekly",
-                price: subscriptionService.weeklyProduct?.displayPrice ?? "...",
-                period: "/week",
-                subtitle: nil,
-                planId: "turbulence_forecast_weekly"
-            )
-
-            planCard(
-                title: "Yearly",
-                price: subscriptionService.yearlyProduct?.displayPrice ?? "...",
-                period: "/year",
-                subtitle: "3-day free trial",
-                planId: "turbulence_forecast_yearly"
-            )
+            if paywallVariant == "B" {
+                planCard(
+                    title: "Weekly",
+                    price: subscriptionService.weeklyTrialProduct?.displayPrice ?? "...",
+                    period: "/week",
+                    subtitle: "3-day free trial",
+                    planId: SubscriptionService.weeklyTrialSubscription
+                )
+                planCard(
+                    title: "Yearly",
+                    price: subscriptionService.yearlyNoTrialProduct?.displayPrice ?? "...",
+                    period: "/year",
+                    subtitle: nil,
+                    planId: SubscriptionService.yearlyNoTrialSubscription
+                )
+            } else {
+                planCard(
+                    title: "Weekly",
+                    price: subscriptionService.weeklyProduct?.displayPrice ?? "...",
+                    period: "/week",
+                    subtitle: nil,
+                    planId: SubscriptionService.weeklySubscription
+                )
+                planCard(
+                    title: "Yearly",
+                    price: subscriptionService.yearlyProduct?.displayPrice ?? "...",
+                    period: "/year",
+                    subtitle: "3-day free trial",
+                    planId: SubscriptionService.yearlySubscription
+                )
+            }
         }
         .frame(height: 90)
     }
@@ -324,10 +367,17 @@ struct PaywallView: View {
 
     private var trialInfoText: some View {
         Group {
-            if selectedPlanId == "turbulence_forecast_yearly" {
+            switch selectedPlanId {
+            case SubscriptionService.yearlySubscription:
                 let price = subscriptionService.yearlyProduct?.displayPrice ?? "..."
                 Text("3-day free trial, then \(price)/year")
-            } else {
+            case SubscriptionService.weeklyTrialSubscription:
+                let price = subscriptionService.weeklyTrialProduct?.displayPrice ?? "..."
+                Text("3-day free trial, then \(price)/week")
+            case SubscriptionService.yearlyNoTrialSubscription:
+                let price = subscriptionService.yearlyNoTrialProduct?.displayPrice ?? "..."
+                Text("\(price)/year, cancel anytime")
+            default:
                 let price = subscriptionService.weeklyProduct?.displayPrice ?? "..."
                 Text("\(price)/week, cancel anytime")
             }
@@ -348,7 +398,7 @@ struct PaywallView: View {
                     ProgressView()
                         .tint(.white)
                 } else {
-                    Text(selectedPlanId == "turbulence_forecast_yearly" ? "Start Free Trial" : "Subscribe")
+                    Text([SubscriptionService.yearlySubscription, SubscriptionService.weeklyTrialSubscription].contains(selectedPlanId) ? "Start Free Trial" : "Subscribe")
                         .font(.system(size: 20, weight: .bold))
                 }
             }
@@ -544,9 +594,14 @@ struct PaywallView: View {
 
     private func purchase() {
         let product: Product?
-        if selectedPlanId == "turbulence_forecast_yearly" {
+        switch selectedPlanId {
+        case SubscriptionService.yearlySubscription:
             product = subscriptionService.yearlyProduct
-        } else {
+        case SubscriptionService.weeklyTrialSubscription:
+            product = subscriptionService.weeklyTrialProduct
+        case SubscriptionService.yearlyNoTrialSubscription:
+            product = subscriptionService.yearlyNoTrialProduct
+        default:
             product = subscriptionService.weeklyProduct
         }
 

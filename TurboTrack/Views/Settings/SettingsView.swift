@@ -14,6 +14,10 @@ struct SettingsView: View {
     @State private var showPaywall = false
     @State private var showFAQ = false
     @State private var showUpsell = false
+    #if DEBUG
+    @State private var showPaywallA = false
+    @State private var showPaywallB = false
+    #endif
 
     var body: some View {
         NavigationStack {
@@ -234,6 +238,20 @@ struct SettingsView: View {
                     } label: {
                         Label("Restart Onboarding", systemImage: "arrow.counterclockwise")
                     }
+
+                    Button {
+                        showPaywallA = true
+                    } label: {
+                        Label("Show Paywall A (weekly default)", systemImage: "creditcard")
+                            .foregroundColor(.indigo)
+                    }
+
+                    Button {
+                        showPaywallB = true
+                    } label: {
+                        Label("Show Paywall B (weekly trial default)", systemImage: "creditcard.fill")
+                            .foregroundColor(.teal)
+                    }
                 }
                 #endif
 
@@ -272,6 +290,16 @@ struct SettingsView: View {
                 }
                 .environmentObject(subscriptionService)
             }
+            #if DEBUG
+            .sheet(isPresented: $showPaywallA) {
+                PaywallView(source: "debug", onComplete: { showPaywallA = false }, debugVariant: "A")
+                    .environmentObject(subscriptionService)
+            }
+            .sheet(isPresented: $showPaywallB) {
+                PaywallView(source: "debug", onComplete: { showPaywallB = false }, debugVariant: "B")
+                    .environmentObject(subscriptionService)
+            }
+            #endif
             .sheet(isPresented: $showFAQ) {
                 TurbulenceFAQView()
                     .presentationDetents([.large])
